@@ -5,8 +5,8 @@ function App() {
   
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4">
-      <h1 className="text-4xl font-bold mb-6">NullBoard</h1>
-      <p className="text-xl mb-10">A project management tool with absolutely no features.</p>
+      <h1 className="text-4xl font-bold mb-6">NullBoard Pro</h1>
+      <p className="text-xl mb-10">The premium project management tool with absolutely no features.</p>
       
       <div className="flex flex-col gap-6 w-full max-w-md">
         <button 
@@ -41,7 +41,7 @@ function App() {
       {showMessage && (
         <div className="mt-10 p-4 bg-red-900 rounded max-w-md">
           <p className="text-center">
-            Sorry, that feature doesn't exist. Remember: NullBoard is for developers who don't plan to do anything.
+            Sorry, that feature doesn't exist. This is NullBoard Pro - same as NullBoard, but with a fancier name.
           </p>
           <div className="flex justify-center mt-4">
             <button 
