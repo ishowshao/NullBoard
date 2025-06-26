@@ -15,8 +15,8 @@ function App() {
         </button>
       </div>
       
-      <h1 className="text-4xl font-bold mb-6">NullBoard Pro</h1>
-      <p className="text-xl mb-10">The premium project management tool with absolutely no features.</p>
+      <h1 className="text-4xl font-bold mb-6">NullBoard Pro Max</h1>
+      <p className="text-xl mb-10">The ultra-premium project management tool with absolutely no features, now with 50% more nothing.</p>
       
       <div className="flex flex-col gap-6 w-full max-w-md">
         <button 
@@ -46,12 +46,19 @@ function App() {
         >
           Save your progress
         </button>
+        
+        <button 
+          className={`${darkMode ? 'bg-purple-800 hover:bg-purple-700' : 'bg-purple-200 hover:bg-purple-300'} px-4 py-2 rounded text-left`}
+          onClick={() => setShowMessage(true)}
+        >
+          ✨ Premium AI Assistant (New!)
+        </button>
       </div>
       
       {showMessage && (
         <div className={`mt-10 p-4 ${darkMode ? 'bg-red-900' : 'bg-red-300'} rounded max-w-md`}>
           <p className="text-center">
-            Sorry, that feature doesn't exist. This is NullBoard Pro - same as NullBoard, but with a fancier name.
+            Sorry, that feature doesn't exist. This is NullBoard Pro Max - same as NullBoard Pro, but with an even fancier name and 50% more disappointment.
           </p>
           <div className="flex justify-center mt-4">
             <button 
