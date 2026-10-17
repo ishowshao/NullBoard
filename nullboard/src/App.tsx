@@ -1,11 +1,38 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 function App() {
   const [showMessage, setShowMessage] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
+  const messageTrigger = useRef<HTMLButtonElement | null>(null);
+
+  const showFeatureMessage = (event: React.MouseEvent<HTMLButtonElement>) => {
+    messageTrigger.current = event.currentTarget;
+    setShowMessage(true);
+  };
+
+  const dismissMessage = useCallback(() => {
+    setShowMessage(false);
+    messageTrigger.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    if (!showMessage) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !event.defaultPrevented) {
+        event.preventDefault();
+        dismissMessage();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [showMessage, dismissMessage]);
   
   return (
-    <div className={`min-h-screen ${darkMode ? 'bg-black text-white' : 'bg-white text-black'} flex flex-col items-center justify-center p-4`}>
+    <main
+      className={`min-h-screen ${darkMode ? 'bg-black text-white' : 'bg-white text-black'} flex flex-col items-center justify-center p-4`}
+    >
       <div className="absolute top-4 right-4">
         <button 
           className={`px-3 py-1 rounded ${darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-200 hover:bg-gray-300'}`}
@@ -21,62 +48,63 @@ function App() {
       <div className="flex flex-col gap-6 w-full max-w-md">
         <button 
           className={`${darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-200 hover:bg-gray-300'} px-4 py-2 rounded text-left`}
-          onClick={() => setShowMessage(true)}
+          onClick={showFeatureMessage}
         >
           Create a new task
         </button>
         
         <button 
           className={`${darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-200 hover:bg-gray-300'} px-4 py-2 rounded text-left`}
-          onClick={() => setShowMessage(true)}
+          onClick={showFeatureMessage}
         >
           Add tags
         </button>
         
         <button 
           className={`${darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-200 hover:bg-gray-300'} px-4 py-2 rounded text-left`}
-          onClick={() => setShowMessage(true)}
+          onClick={showFeatureMessage}
         >
           Collaborate with team
         </button>
         
         <button 
           className={`${darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-200 hover:bg-gray-300'} px-4 py-2 rounded text-left`}
-          onClick={() => setShowMessage(true)}
+          onClick={showFeatureMessage}
         >
           Save your progress
         </button>
         
         <button 
           className={`${darkMode ? 'bg-purple-800 hover:bg-purple-700' : 'bg-purple-200 hover:bg-purple-300'} px-4 py-2 rounded text-left`}
-          onClick={() => setShowMessage(true)}
+          onClick={showFeatureMessage}
         >
           ✨ Premium AI Assistant (New!)
         </button>
       </div>
       
-      {showMessage && (
-        <div className={`mt-10 p-4 ${darkMode ? 'bg-red-900' : 'bg-red-300'} rounded max-w-md`}>
-          <p className="text-center">
-            Sorry, that feature doesn't exist. This is NullBoard Pro Max - same as NullBoard Pro, but with an even fancier name and 50% more disappointment.
-          </p>
+      <div className={showMessage ? `mt-10 p-4 ${darkMode ? 'bg-red-900' : 'bg-red-300'} rounded max-w-md` : ''}>
+        <p className="text-center" role="status">
+          {showMessage ? "Sorry, that feature doesn't exist. This is NullBoard Pro Max - same as NullBoard Pro, but with an even fancier name and 50% more disappointment." : ''}
+        </p>
+        {showMessage && (
           <div className="flex justify-center mt-4">
             <button 
               className={`${darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-200 hover:bg-gray-300'} px-4 py-2 rounded`}
-              onClick={() => setShowMessage(false)}
+              onClick={dismissMessage}
             >
               Accept defeat
             </button>
           </div>
-        </div>
-      )}
+        )}
+      </div>
       
       <footer className={`mt-auto pt-8 ${darkMode ? 'text-gray-500' : 'text-gray-600'} text-sm`}>
         <p>NullBoard: Because the backend is the root obstacle to dreams.</p>
         <p>Each interaction will remind you: "Why are you still working on this?"</p>
       </footer>
-    </div>
+    </main>
   );
 }
 
 export default App;
+
