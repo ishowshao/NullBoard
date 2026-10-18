@@ -23,17 +23,17 @@ test('switches between light and dark themes', () => {
 });
 
 test.each([
-  'Create a new task',
-  'Add tags',
-  'Collaborate with team',
-  'Save your progress',
-  '✨ Premium AI Assistant (New!)',
-])('shows and dismisses the message for %s', (featureName) => {
+  ['Create a new task', 'Task created in a parallel universe. This one remains beautifully empty.'],
+  ['Add tags', 'Tag rejected: even #nothing was too much commitment.'],
+  ['Collaborate with team', 'Your team is perfectly aligned on doing nothing. No invitations were sent.'],
+  ['Save your progress', "Progress saved to your imagination. Please don't clear your daydreams."],
+  ['✨ Premium AI Assistant (New!)', 'Our premium AI recommends taking a break. Zero tokens. Zero tasks. Maximum confidence.'],
+])('shows and dismisses the unique message for %s', (featureName, message) => {
   render(<App />);
   const trigger = screen.getByRole('button', { name: featureName });
 
   userEvent.click(trigger);
-  expect(screen.getByRole('status')).toHaveTextContent("Sorry, that feature doesn't exist.");
+  expect(screen.getByRole('status').textContent).toBe(message);
 
   userEvent.click(screen.getByRole('button', { name: 'Accept defeat' }));
   expect(screen.getByRole('status')).toBeEmptyDOMElement();
@@ -62,14 +62,17 @@ test('returns focus to the most recent feature after repeated interactions', () 
   const lastTrigger = screen.getByRole('button', { name: 'Add tags' });
 
   userEvent.click(firstTrigger);
+  const firstMessage = screen.getByRole('status').textContent;
   userEvent.click(lastTrigger);
   expect(screen.getAllByRole('status')).toHaveLength(1);
+  expect(screen.getByRole('status')).toHaveTextContent('Tag rejected:');
+  expect(screen.getByRole('status').textContent).not.toBe(firstMessage);
   userEvent.keyboard('{Escape}');
   expect(lastTrigger).toHaveFocus();
   expect(screen.getByRole('status')).toBeEmptyDOMElement();
 
   userEvent.click(firstTrigger);
-  expect(screen.getByRole('status')).not.toBeEmptyDOMElement();
+  expect(screen.getByRole('status').textContent).toBe(firstMessage);
   userEvent.click(screen.getByRole('button', { name: 'Accept defeat' }));
   expect(firstTrigger).toHaveFocus();
 });
@@ -85,8 +88,6 @@ test('Escape does not move focus when no message is open', () => {
   expect(screen.getByRole('status')).toBeEmptyDOMElement();
 });
 
-
-
 test('keeps the same live region mounted while its message changes', () => {
   render(<App />);
   const status = screen.getByRole('status');
@@ -95,6 +96,10 @@ test('keeps the same live region mounted while its message changes', () => {
   userEvent.click(screen.getByRole('button', { name: 'Add tags' }));
   expect(screen.getByRole('status')).toBe(status);
   expect(status).not.toBeEmptyDOMElement();
+
+  userEvent.click(screen.getByRole('button', { name: 'Save your progress' }));
+  expect(screen.getByRole('status')).toBe(status);
+  expect(status).toHaveTextContent('Progress saved to your imagination.');
 
   userEvent.keyboard('{Escape}');
   expect(screen.getByRole('status')).toBe(status);
@@ -132,4 +137,47 @@ test('removes the Escape listener when the app unmounts', () => {
   document.dispatchEvent(escape);
 
   expect(escape.defaultPrevented).toBe(false);
+});
+
+test('keeps the active joke and premium styling when switching themes', () => {
+  render(<App />);
+  const premiumButton = screen.getByRole('button', { name: '✨ Premium AI Assistant (New!)' });
+  const regularButton = screen.getByRole('button', { name: 'Add tags' });
+
+  userEvent.click(premiumButton);
+  const message = screen.getByRole('status').textContent;
+  expect(premiumButton).toHaveClass('bg-purple-800');
+  expect(regularButton).toHaveClass('bg-gray-800');
+
+  userEvent.click(screen.getByRole('button', { name: /Light/ }));
+  expect(screen.getByRole('status').textContent).toBe(message);
+  expect(premiumButton).toHaveClass('bg-purple-200');
+  expect(regularButton).toHaveClass('bg-gray-200');
+
+  userEvent.click(screen.getByRole('button', { name: /Dark/ }));
+  expect(screen.getByRole('status').textContent).toBe(message);
+  expect(premiumButton).toHaveClass('bg-purple-800');
+  expect(regularButton).toHaveClass('bg-gray-800');
+
+  userEvent.keyboard('{Escape}');
+  expect(premiumButton).toHaveFocus();
+  expect(screen.getByRole('status')).toBeEmptyDOMElement();
+});
+
+test('repeated clicks keep one message and allow the same joke to reopen', () => {
+  render(<App />);
+  const trigger = screen.getByRole('button', { name: 'Save your progress' });
+
+  userEvent.click(trigger);
+  const message = screen.getByRole('status').textContent;
+  userEvent.click(trigger);
+  expect(screen.getAllByRole('status')).toHaveLength(1);
+  expect(screen.getByRole('status').textContent).toBe(message);
+  expect(screen.getAllByRole('button', { name: 'Accept defeat' })).toHaveLength(1);
+
+  userEvent.click(screen.getByRole('button', { name: 'Accept defeat' }));
+  expect(trigger).toHaveFocus();
+  expect(screen.getByRole('status')).toBeEmptyDOMElement();
+  userEvent.keyboard('{Enter}');
+  expect(screen.getByRole('status').textContent).toBe(message);
 });

@@ -1,17 +1,19 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Feature, features } from './features';
 
 function App() {
-  const [showMessage, setShowMessage] = useState(false);
+  const [activeFeature, setActiveFeature] = useState<Feature | null>(null);
+  const showMessage = activeFeature !== null;
   const [darkMode, setDarkMode] = useState(true);
   const messageTrigger = useRef<HTMLButtonElement | null>(null);
 
-  const showFeatureMessage = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const showFeatureMessage = (event: React.MouseEvent<HTMLButtonElement>, feature: Feature) => {
     messageTrigger.current = event.currentTarget;
-    setShowMessage(true);
+    setActiveFeature(feature);
   };
 
   const dismissMessage = useCallback(() => {
-    setShowMessage(false);
+    setActiveFeature(null);
     messageTrigger.current?.focus();
   }, []);
 
@@ -46,45 +48,23 @@ function App() {
       <p className="text-xl mb-10">The ultra-premium project management tool with absolutely no features, now with 50% more nothing.</p>
       
       <div className="flex flex-col gap-6 w-full max-w-md">
-        <button 
-          className={`${darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-200 hover:bg-gray-300'} px-4 py-2 rounded text-left`}
-          onClick={showFeatureMessage}
-        >
-          Create a new task
-        </button>
-        
-        <button 
-          className={`${darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-200 hover:bg-gray-300'} px-4 py-2 rounded text-left`}
-          onClick={showFeatureMessage}
-        >
-          Add tags
-        </button>
-        
-        <button 
-          className={`${darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-200 hover:bg-gray-300'} px-4 py-2 rounded text-left`}
-          onClick={showFeatureMessage}
-        >
-          Collaborate with team
-        </button>
-        
-        <button 
-          className={`${darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-200 hover:bg-gray-300'} px-4 py-2 rounded text-left`}
-          onClick={showFeatureMessage}
-        >
-          Save your progress
-        </button>
-        
-        <button 
-          className={`${darkMode ? 'bg-purple-800 hover:bg-purple-700' : 'bg-purple-200 hover:bg-purple-300'} px-4 py-2 rounded text-left`}
-          onClick={showFeatureMessage}
-        >
-          ✨ Premium AI Assistant (New!)
-        </button>
+        {features.map((feature) => (
+          <button
+            key={feature.id}
+            className={`${feature.premium
+              ? (darkMode ? 'bg-purple-800 hover:bg-purple-700' : 'bg-purple-200 hover:bg-purple-300')
+              : (darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-200 hover:bg-gray-300')
+            } px-4 py-2 rounded text-left`}
+            onClick={(event) => showFeatureMessage(event, feature)}
+          >
+            {feature.label}
+          </button>
+        ))}
       </div>
       
       <div className={showMessage ? `mt-10 p-4 ${darkMode ? 'bg-red-900' : 'bg-red-300'} rounded max-w-md` : ''}>
         <p className="text-center" role="status">
-          {showMessage ? "Sorry, that feature doesn't exist. This is NullBoard Pro Max - same as NullBoard Pro, but with an even fancier name and 50% more disappointment." : ''}
+          {activeFeature?.message ?? ''}
         </p>
         {showMessage && (
           <div className="flex justify-center mt-4">
