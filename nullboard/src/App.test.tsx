@@ -14,10 +14,10 @@ test('renders the NullBoard landing page without a feature message', () => {
 test('switches between light and dark themes', () => {
   render(<App />);
 
-  userEvent.click(screen.getByRole('button', { name: /Light/ }));
+  userEvent.click(screen.getByRole('button', { name: 'Dark mode', pressed: true }));
   expect(screen.getByRole('main')).toHaveClass('bg-white', 'text-black');
 
-  userEvent.click(screen.getByRole('button', { name: /Dark/ }));
+  userEvent.click(screen.getByRole('button', { name: 'Dark mode', pressed: false }));
   expect(screen.getByRole('main')).toHaveClass('bg-black', 'text-white');
   expect(screen.getByRole('status')).toBeEmptyDOMElement();
 });
@@ -79,7 +79,7 @@ test('returns focus to the most recent feature after repeated interactions', () 
 
 test('Escape does not move focus when no message is open', () => {
   render(<App />);
-  const themeButton = screen.getByRole('button', { name: /Light/ });
+  const themeButton = screen.getByRole('button', { name: 'Dark mode', pressed: true });
 
   themeButton.focus();
   userEvent.keyboard('{Escape}');
@@ -149,12 +149,12 @@ test('keeps the active joke and premium styling when switching themes', () => {
   expect(premiumButton).toHaveClass('bg-purple-800');
   expect(regularButton).toHaveClass('bg-gray-800');
 
-  userEvent.click(screen.getByRole('button', { name: /Light/ }));
+  userEvent.click(screen.getByRole('button', { name: 'Dark mode', pressed: true }));
   expect(screen.getByRole('status').textContent).toBe(message);
   expect(premiumButton).toHaveClass('bg-purple-200');
   expect(regularButton).toHaveClass('bg-gray-200');
 
-  userEvent.click(screen.getByRole('button', { name: /Dark/ }));
+  userEvent.click(screen.getByRole('button', { name: 'Dark mode', pressed: false }));
   expect(screen.getByRole('status').textContent).toBe(message);
   expect(premiumButton).toHaveClass('bg-purple-800');
   expect(regularButton).toHaveClass('bg-gray-800');
@@ -180,4 +180,27 @@ test('repeated clicks keep one message and allow the same joke to reopen', () =>
   expect(screen.getByRole('status')).toBeEmptyDOMElement();
   userEvent.keyboard('{Enter}');
   expect(screen.getByRole('status').textContent).toBe(message);
+});
+
+
+test.each(['{Enter}', ' '])('toggles dark mode with %s while keeping its name and focus', (key) => {
+  render(<App />);
+  const themeButton = screen.getByRole('button', { name: 'Dark mode', pressed: true });
+
+  userEvent.tab();
+  expect(themeButton).toHaveFocus();
+  expect(themeButton).toHaveTextContent('Dark mode: On');
+
+  userEvent.keyboard(key);
+  expect(screen.getByRole('button', { name: 'Dark mode', pressed: false })).toBe(themeButton);
+  expect(themeButton).toHaveFocus();
+  expect(themeButton).toHaveTextContent('Dark mode: Off');
+  expect(screen.getByRole('main')).toHaveClass('bg-white', 'text-black');
+
+  userEvent.keyboard(key);
+  expect(screen.getByRole('button', { name: 'Dark mode', pressed: true })).toBe(themeButton);
+  expect(themeButton).toHaveFocus();
+  expect(themeButton).toHaveTextContent('Dark mode: On');
+  expect(screen.getByRole('main')).toHaveClass('bg-black', 'text-white');
+  expect(screen.getByRole('status')).toBeEmptyDOMElement();
 });

@@ -37,10 +37,14 @@ function App() {
     >
       <div className="absolute top-4 right-4">
         <button 
-          className={`px-3 py-1 rounded ${darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-200 hover:bg-gray-300'}`}
-          onClick={() => setDarkMode(!darkMode)}
+          type="button"
+          aria-pressed={darkMode}
+          className={`px-3 py-1 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${darkMode ? 'bg-gray-800 hover:bg-gray-700 focus-visible:outline-white' : 'bg-gray-200 hover:bg-gray-300 focus-visible:outline-black'}`}
+          onClick={() => setDarkMode((current) => !current)}
         >
-          {darkMode ? '☀️ Light' : '🌙 Dark'}
+          <span aria-hidden="true">{darkMode ? '🌙' : '☀️'} </span>
+          Dark mode
+          <span aria-hidden="true">: {darkMode ? 'On' : 'Off'}</span>
         </button>
       </div>
       
