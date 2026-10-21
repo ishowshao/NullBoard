@@ -1,53 +1,66 @@
 # NullBoard Pro Max
 
-🧠 项目名称：NullBoard Pro Max
+**Zero tasks. Zero pressure. 50% more nothing.**
 
-一句话介绍：
-一款完全没有功能的项目管理工具，专为那些不打算做任何事的开发者而生。现已升级为 Pro Max 版本！
+A tiny, satirical project management app for developers who have had enough project management. Five convincing buttons. Five different ways to accomplish absolutely nothing.
 
-## 核心功能：
-- 创建任务？不行。你不需要任务。
-- 添加标签？我们反标签主义。
-- 实时协作？那你得先有同事。
-- 黑暗模式？当然有——整个界面一片漆黑。
-- 数据持久化？不存在的，我们只保存在你的记忆里。
-- ✨ Premium AI Assistant？全新功能！但是不存在。
+一款完全没有功能的项目管理工具，专为不打算做任何事的开发者而生。五个看起来很有用的按钮，各有一句认真敷衍你的笑话。
 
-## 最新更新 (2025-06-26)
-- 🚀 升级为 NullBoard Pro Max 版本，增加了 50% 的虚无感
-- ✨ 新增 Premium AI Assistant 按钮（当然，它什么也不做）
-- 💫 更加华丽的紫色按钮设计
-- 😤 更多的失望感体验
+## Try the joke in 30 seconds / 30 秒看懂这个玩笑
 
-## 技术栈：
-- 前端：React + Tailwind（当然了，我们得把界面做得像真有点东西）
-- 后端：无（因为后端才是阻碍梦想的根源）
-- CI/CD：自动部署到 nowhere。每次提交都会提醒你："为什么还在搞这个？"
+- Create a new task → “Task created in a parallel universe. This one remains beautifully empty.”
+- Add tags → Even #nothing is too much commitment.
+- Collaborate with team → Perfect alignment on doing nothing. No invitations sent.
+- Save your progress → Your imagination is the database.
+- ✨ Premium AI Assistant → Zero tokens. Zero tasks. Maximum confidence.
 
----
+The dark/light switch actually works. So do the keyboard controls: Tab to a button, press Enter or Space, then Escape or “Accept defeat” to dismiss the joke and return to its button. Every control has a visible keyboard-focus outline and a minimum 44px height.
 
-# NullBoard Pro Max
+明暗主题切换是真的，键盘操作也是真的。用 Tab 选中按钮，Enter 或空格打开笑话，Escape 或 “Accept defeat” 关闭提示并返回原按钮。
 
-🧠 Project Name: NullBoard Pro Max
+## Run locally / 本地运行
 
-One-line Introduction:
-A project management tool with absolutely no features, specifically designed for developers who don't plan to do anything. Now upgraded to Pro Max version!
+You need Node.js and npm. The current checks were run with Node.js 24 and npm 11.
 
-## Core Features:
-- Create tasks? No way. You don't need tasks.
-- Add tags? We're anti-tag activists.
-- Real-time collaboration? You'd need colleagues first.
-- Dark mode? Of course—the entire interface is pitch black.
-- Data persistence? Nonexistent, we only save in your memory.
-- ✨ Premium AI Assistant? Brand new feature! But it doesn't exist.
+```sh
+git clone https://github.com/ishowshao/NullBoard.git
+cd NullBoard/nullboard
+npm ci
+npm start
+```
 
-## Latest Updates (2025-06-26)
-- 🚀 Upgraded to NullBoard Pro Max version with 50% more nothingness
-- ✨ Added Premium AI Assistant button (which does absolutely nothing, of course)
-- 💫 Fancy new purple button design
-- 😤 Enhanced disappointment experience
+Open [localhost:3000](http://localhost:3000). The runnable app is inside `nullboard/`, not the repository root. No account, backend, API key, or environment file is needed.
 
-## Tech Stack:
-- Frontend: React + Tailwind (naturally, we need to make the interface look like it has something)
-- Backend: None (because the backend is the root obstacle to dreams)
-- CI/CD: Automatically deployed to nowhere. Each commit will remind you: "Why are you still working on this?"
+打开本地页面即可体验。注意先进入 `nullboard/` 子目录，无需账号、后端、API key 或环境变量文件。
+
+## What is real? / 哪些是真的？
+
+- React + TypeScript, styled with Tailwind CSS and built with Create React App.
+- Five distinct punchlines, dark/light themes, keyboard dismissal and focus restoration.
+- Responsive layout, local branded icons, and regression tests.
+- No real tasks, tags, team invitations, saved progress, or AI calls. Reloading starts fresh, including the theme.
+
+This is a small frontend joke, not a production task manager or an AI service. “Pro Max” is part of the joke, not a paid plan.
+
+这是一个轻量前端玩笑，不是真正的任务管理或 AI 服务；“Pro Max” 不是收费套餐，刷新后也不会保留进度或主题。
+
+## Check a change / 验证改动
+
+Run these from `nullboard/`:
+
+```sh
+CI=true npm test -- --watchAll=false --runInBand
+npx tsc --noEmit
+npx eslint src --max-warnings=0
+CI=true npm run build
+```
+
+Tests cover the actual jokes, repeated interactions, dismissal, focus, themes and branding. Layout changes also need a real-browser check; DOM tests do not verify pixel layout or replace screen-reader testing.
+
+## Keep nothing interesting / 让“什么也不做”更有趣
+
+Start with [the roadmap](nullboard/ROADMAP.md) and [development notes](nullboard/README.md). Punchlines live in [`features.ts`](nullboard/src/features.ts); their expected behavior lives in [`App.test.tsx`](nullboard/src/App.test.tsx).
+
+Small jokes, clearer presentation, accessibility fixes and reliable tests are welcome. Keep it lightweight: no real task management, accounts, backend, or data collection. If it made you smile, a Star is a nice way to bookmark the joke.
+
+欢迎贡献笑点、展示体验、无障碍改进和测试。保持轻量，不加入真正的任务管理、账号、后端或数据收集。如果它让你笑了，欢迎用 Star 收藏这个玩笑。

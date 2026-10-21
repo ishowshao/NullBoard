@@ -204,3 +204,23 @@ test.each(['{Enter}', ' '])('toggles dark mode with %s while keeping its name an
   expect(screen.getByRole('main')).toHaveClass('bg-black', 'text-white');
   expect(screen.getByRole('status')).toBeEmptyDOMElement();
 });
+
+test('gives every control an explicit button type, touch-target and keyboard-focus styles in both themes', () => {
+  render(<App />);
+  userEvent.click(screen.getByRole('button', { name: 'Add tags' }));
+
+  const expectControls = (outline: string) => {
+    const buttons = screen.getAllByRole('button');
+    expect(buttons).toHaveLength(7);
+    buttons.forEach((button) => {
+      expect(button).toHaveAttribute('type', 'button');
+      expect(button).toHaveClass('min-h-[44px]', 'focus-visible:outline', 'focus-visible:outline-2', 'focus-visible:outline-offset-2', outline);
+    });
+  };
+
+  expectControls('focus-visible:outline-white');
+  userEvent.click(screen.getByRole('button', { name: 'Dark mode' }));
+  expectControls('focus-visible:outline-black');
+  userEvent.click(screen.getByRole('button', { name: 'Dark mode' }));
+  expectControls('focus-visible:outline-white');
+});
