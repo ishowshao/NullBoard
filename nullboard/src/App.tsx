@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { Feature, features } from './features';
 
 function App() {
   const [activeFeature, setActiveFeature] = useState<Feature | null>(null);
   const showMessage = activeFeature !== null;
+  const feedbackId = useId();
   const [darkMode, setDarkMode] = useState(true);
   const messageTrigger = useRef<HTMLButtonElement | null>(null);
   const buttonFocus = `focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${darkMode ? 'focus-visible:outline-white' : 'focus-visible:outline-black'}`;
@@ -57,6 +58,8 @@ function App() {
           <button
             key={feature.id}
             type="button"
+            aria-controls={feedbackId}
+            aria-expanded={activeFeature?.id === feature.id}
             className={`${feature.premium
               ? (darkMode ? 'bg-purple-800 hover:bg-purple-700' : 'bg-purple-200 hover:bg-purple-300')
               : (darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-200 hover:bg-gray-300')
@@ -69,7 +72,7 @@ function App() {
       </div>
       
       <div className={showMessage ? `mt-10 p-4 ${darkMode ? 'bg-red-900' : 'bg-red-300'} rounded max-w-md` : ''}>
-        <p className="text-center" role="status">
+        <p id={feedbackId} className="text-center" role="status">
           {activeFeature?.message ?? ''}
         </p>
         {showMessage && (

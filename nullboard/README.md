@@ -32,6 +32,6 @@ CI=true npm run build
 - `src/branding.test.ts`: metadata, manifest and local icon checks.
 - `public/`: browser metadata and branded icons.
 
-Keep the joke intentional. Buttons must not create real tasks, send invitations, call an AI service, or save progress. Preserve the persistent status region, Escape dismissal and focus restoration when changing feedback.
+Keep the joke intentional. Buttons must not create real tasks, send invitations, call an AI service, or save progress. Preserve the persistent status region, Escape dismissal and focus restoration when changing feedback. Each feature button exposes whether its joke is open with `aria-expanded` and points to the shared status region with `aria-controls`; keep that target mounted and its ID unique per app instance.
 
 For presentation changes, check narrow screens, enlarged text, both themes, keyboard focus, repeated clicks and dismissal in a browser. Jest's DOM environment cannot validate actual geometry, touch input, or screen-reader announcements.

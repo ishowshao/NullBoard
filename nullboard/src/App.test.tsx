@@ -224,3 +224,50 @@ test('gives every control an explicit button type, touch-target and keyboard-foc
   userEvent.click(screen.getByRole('button', { name: 'Dark mode' }));
   expectControls('focus-visible:outline-white');
 });
+
+
+test.each(['{Enter}', ' '])('exposes the active joke and its feedback target with %s', (key) => {
+  render(<App />);
+  const featureNames = ['Create a new task', 'Add tags', 'Collaborate with team', 'Save your progress', '✨ Premium AI Assistant (New!)'];
+  const buttons = featureNames.map((name) => screen.getByRole('button', { name, expanded: false }));
+  const feedbackId = buttons[0].getAttribute('aria-controls');
+  const feedback = screen.getByRole('status');
+  expect(feedback).toHaveAttribute('id', feedbackId);
+  buttons.forEach((button) => expect(button).toHaveAttribute('aria-controls', feedbackId));
+
+  buttons.forEach((button) => {
+    button.focus();
+    userEvent.keyboard(key);
+    buttons.forEach((candidate) => {
+      expect(candidate).toHaveAttribute('aria-expanded', String(candidate === button));
+    });
+    expect(screen.getByRole('status')).toBe(feedback);
+    expect(screen.getByRole('status')).not.toBeEmptyDOMElement();
+  });
+
+  userEvent.click(screen.getByRole('button', { name: 'Dark mode' }));
+  expect(buttons[4]).toHaveAttribute('aria-expanded', 'true');
+  userEvent.keyboard('{Escape}');
+  buttons.forEach((button) => expect(button).toHaveAttribute('aria-expanded', 'false'));
+  expect(buttons[4]).toHaveFocus();
+
+  userEvent.keyboard(key);
+  expect(buttons[4]).toHaveAttribute('aria-expanded', 'true');
+  userEvent.click(screen.getByRole('button', { name: 'Accept defeat' }));
+  buttons.forEach((button) => expect(button).toHaveAttribute('aria-expanded', 'false'));
+  expect(screen.getByRole('status')).toBeEmptyDOMElement();
+});
+
+test('keeps feedback relationships unique when two app instances are mounted', () => {
+  render(<><App /><App /></>);
+  const buttons = screen.getAllByRole('button', { name: 'Add tags' });
+  const statuses = screen.getAllByRole('status');
+  const firstId = buttons[0].getAttribute('aria-controls');
+  const secondId = buttons[1].getAttribute('aria-controls');
+
+  expect(firstId).toBeTruthy();
+  expect(secondId).toBeTruthy();
+  expect(firstId).not.toBe(secondId);
+  expect(statuses[0]).toHaveAttribute('id', firstId);
+  expect(statuses[1]).toHaveAttribute('id', secondId);
+});
