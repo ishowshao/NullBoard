@@ -28,7 +28,9 @@ CI=true npm run build
 
 - `src/features.ts`: the five fake features and their distinct punchlines.
 - `src/App.tsx`: layout, theme state, live feedback and keyboard dismissal.
+- `src/CopyJoke.tsx`: user-triggered clipboard sharing with success and manual-copy fallback feedback. The parent keys this component by feature ID so a pending copy cannot update a different joke.
 - `src/App.test.tsx`: interaction and accessible-control regression coverage.
+- `src/CopyJoke.test.tsx`: clipboard success, rejection, missing API, retry, keyboard activation and stale asynchronous results.
 - `src/branding.test.ts`: metadata, manifest and local icon checks.
 - `public/`: browser metadata and branded icons.
 

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { Feature, features } from './features';
+import CopyJoke from './CopyJoke';
 
 function App() {
   const [activeFeature, setActiveFeature] = useState<Feature | null>(null);
@@ -75,6 +76,13 @@ function App() {
         <p id={feedbackId} className="text-center" role="status">
           {activeFeature?.message ?? ''}
         </p>
+        {activeFeature && (
+          <CopyJoke
+            key={activeFeature.id}
+            message={activeFeature.message}
+            className={`${darkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-200 hover:bg-gray-300'} min-h-[44px] px-4 py-2 rounded ${buttonFocus}`}
+          />
+        )}
         {showMessage && (
           <div className="flex justify-center mt-4">
             <button 

@@ -18,6 +18,10 @@ The dark/light switch actually works. So do the keyboard controls: Tab to a butt
 
 明暗主题切换是真的，键盘操作也是真的。用 Tab 选中按钮，Enter 或空格打开笑话，Escape 或 “Accept defeat” 关闭提示并返回原按钮。
 
+Found a punchline worth sharing? Choose “Copy this joke” to copy it with the NullBoard name. Nothing is posted automatically. If your browser blocks clipboard access, select the joke and copy it manually.
+
+看到喜欢的笑点，点击 “Copy this joke” 即可复制带项目名称的文案，不会自动发布到任何平台；若浏览器不允许复制，可选中文案手动复制。
+
 ## Run locally / 本地运行
 
 You need Node.js and npm. The current checks were run with Node.js 24 and npm 11.
