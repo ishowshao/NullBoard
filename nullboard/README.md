@@ -26,10 +26,11 @@ CI=true npm run build
 
 ## Where to edit
 
-- `src/features.ts`: the five fake features and their distinct punchlines.
-- `src/App.tsx`: layout, theme state, live feedback and keyboard dismissal.
+- `src/features.ts`: the five fake features, their distinct punchlines and the Certificate of Nothing souvenir.
+- `src/App.tsx`: layout, session-only discovery of the five jokes, theme state, live feedback and keyboard dismissal.
 - `src/CopyJoke.tsx`: user-triggered clipboard sharing with success and manual-copy fallback feedback. The parent keys this component by feature ID so a pending copy cannot update a different joke.
 - `src/App.test.tsx`: interaction and accessible-control regression coverage.
+- `src/Achievement.test.tsx`: distinct-feature discovery, certificate keyboard controls, reset on remount and opt-in copying.
 - `src/CopyJoke.test.tsx`: clipboard success, rejection, missing API, retry, keyboard activation and stale asynchronous results.
 - `src/branding.test.ts`: metadata, manifest and local icon checks.
 - `public/`: browser metadata and branded icons.

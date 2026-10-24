@@ -33,3 +33,10 @@ export const features: readonly Feature[] = [
     premium: true,
   },
 ];
+
+// A souvenir for exploring every fake feature, not another real achievement.
+export const zeroAchievement: Feature = {
+  id: 'zero-achievement',
+  label: 'View Certificate of Nothing',
+  message: 'Certificate of Nothing: I explored every NullBoard feature and accomplished absolutely nothing. Five buttons. Zero tasks. Perfect score.',
+};

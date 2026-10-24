@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
-import { Feature, features } from './features';
+import { Feature, features, zeroAchievement } from './features';
 import CopyJoke from './CopyJoke';
 
 function App() {
   const [activeFeature, setActiveFeature] = useState<Feature | null>(null);
+  const [exploredFeatures, setExploredFeatures] = useState<Set<string>>(() => new Set());
+  const achievementUnlocked = features.every((feature) => exploredFeatures.has(feature.id));
   const showMessage = activeFeature !== null;
   const feedbackId = useId();
   const [darkMode, setDarkMode] = useState(true);
@@ -13,6 +15,9 @@ function App() {
   const showFeatureMessage = (event: React.MouseEvent<HTMLButtonElement>, feature: Feature) => {
     messageTrigger.current = event.currentTarget;
     setActiveFeature(feature);
+    if (features.some((candidate) => candidate.id === feature.id)) {
+      setExploredFeatures((explored) => explored.has(feature.id) ? explored : new Set(explored).add(feature.id));
+    }
   };
 
   const dismissMessage = useCallback(() => {
@@ -96,6 +101,23 @@ function App() {
         )}
       </div>
       
+      <div className="mt-6 w-full max-w-md text-center">
+        <p aria-live="polite" aria-atomic="true">
+          {achievementUnlocked ? 'Zero achievement unlocked. You tried everything. Nothing happened.' : ''}
+        </p>
+        {achievementUnlocked && (
+          <button
+            type="button"
+            aria-controls={feedbackId}
+            aria-expanded={activeFeature?.id === zeroAchievement.id}
+            className={`mt-3 min-h-[44px] px-4 py-2 rounded ${buttonFocus} ${darkMode ? 'bg-purple-800 hover:bg-purple-700' : 'bg-purple-200 hover:bg-purple-300'}`}
+            onClick={(event) => showFeatureMessage(event, zeroAchievement)}
+          >
+            {zeroAchievement.label}
+          </button>
+        )}
+      </div>
+
       <footer className={`mt-auto pt-8 max-w-2xl text-center ${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm`}>
         <p>NullBoard: Because the backend is the root obstacle to dreams.</p>
         <p>Each interaction will remind you: "Why are you still working on this?"</p>

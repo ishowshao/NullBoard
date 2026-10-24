@@ -22,6 +22,12 @@ Found a punchline worth sharing? Choose “Copy this joke” to copy it with the
 
 看到喜欢的笑点，点击 “Copy this joke” 即可复制带项目名称的文案，不会自动发布到任何平台；若浏览器不允许复制，可选中文案手动复制。
 
+## A small reward for doing nothing / 一无所获也有奖
+
+Try all five different buttons to unlock “View Certificate of Nothing”: a shareable souvenir for accomplishing absolutely nothing. Repeated clicks on one button do not count. Open it, copy it if you like, or press Escape to get back to doing nothing. The discovery resets on reload; nothing is saved or sent automatically.
+
+试遍五个不同的按钮，即可发现「虚无证书」彩蛋：认真尝试，一事无成。可以打开并主动复制分享；重复点击同一个按钮不算，刷新后重新开始，不存储或自动发送任何数据。
+
 ## Run locally / 本地运行
 
 You need Node.js and npm. The current checks were run with Node.js 24 and npm 11.
