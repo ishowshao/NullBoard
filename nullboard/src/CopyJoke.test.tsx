@@ -26,7 +26,7 @@ test('copies only on request and supports the keyboard without moving focus', as
   userEvent.keyboard('{Enter}');
   expect(await screen.findByText('Joke copied. Productivity remains unchanged.')).toBeInTheDocument();
   expect(writeText).toHaveBeenCalledTimes(1);
-  expect(writeText).toHaveBeenCalledWith('NullBoard Pro Max\n\nTag rejected: even #nothing was too much commitment.\n\nZero tasks. Zero pressure.');
+  expect(writeText).toHaveBeenCalledWith('NullBoard Pro Max\n\nTag rejected: even #nothing was too much commitment.\n\nZero tasks. Zero pressure.\nhttps://github.com/ishowshao/NullBoard');
   expect(copy).toHaveFocus();
   userEvent.click(screen.getByRole('button', { name: 'Dark mode' }));
   expect(screen.getByText('Joke copied. Productivity remains unchanged.')).toBeInTheDocument();
@@ -81,4 +81,23 @@ test('dismisses a pending copy with Escape and reopens without stale feedback', 
   expect(screen.getByRole('button', { name: 'Copy this joke' })).toBeEnabled();
   userEvent.click(screen.getByRole('button', { name: 'Accept defeat' }));
   expect(screen.queryByRole('button', { name: 'Copy this joke' })).not.toBeInTheDocument();
+});
+
+test('shares a stable repository link without leaking the current address', async () => {
+  const originalAddress = window.location.href;
+  window.history.replaceState(null, '', '/local-preview?private=value#draft');
+  const previewAddress = window.location.href;
+  try {
+    render(<App />);
+    userEvent.click(screen.getByRole('button', { name: 'Create a new task' }));
+    userEvent.click(screen.getByRole('button', { name: 'Copy this joke' }));
+    expect(await screen.findByText('Joke copied. Productivity remains unchanged.')).toBeInTheDocument();
+    const sharedText = writeText.mock.calls[0][0];
+    expect(sharedText).toContain('Task created in a parallel universe.');
+    expect(sharedText).toMatch(/\nhttps:\/\/github\.com\/ishowshao\/NullBoard$/);
+    expect(sharedText).not.toMatch(/local-preview|private=value|#draft|localhost/);
+    expect(window.location.href).toBe(previewAddress);
+  } finally {
+    window.history.replaceState(null, '', originalAddress);
+  }
 });

@@ -80,7 +80,7 @@ test('copies the certificate only on request using the existing honest clipboard
     userEvent.click(screen.getByRole('button', { name: 'Copy this joke' }));
     expect(await screen.findByText('Joke copied. Productivity remains unchanged.')).toBeInTheDocument();
     expect(writeText).toHaveBeenCalledTimes(1);
-    expect(writeText).toHaveBeenCalledWith(`NullBoard Pro Max\n\n${certificate}\n\nZero tasks. Zero pressure.`);
+    expect(writeText).toHaveBeenCalledWith(`NullBoard Pro Max\n\n${certificate}\n\nZero tasks. Zero pressure.\nhttps://github.com/ishowshao/NullBoard`);
   } finally {
     if (original) Object.defineProperty(navigator, 'clipboard', original);
     else Reflect.deleteProperty(navigator, 'clipboard');

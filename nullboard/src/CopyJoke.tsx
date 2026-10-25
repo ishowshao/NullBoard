@@ -17,7 +17,7 @@ export default function CopyJoke({ message, className }: { message: string; clas
     pending.current = true;
     setState('copying');
     try {
-      await navigator.clipboard.writeText(`NullBoard Pro Max\n\n${message}\n\nZero tasks. Zero pressure.`);
+      await navigator.clipboard.writeText(`NullBoard Pro Max\n\n${message}\n\nZero tasks. Zero pressure.\nhttps://github.com/ishowshao/NullBoard`);
       if (mounted.current) setState('copied');
     } catch {
       if (mounted.current) setState('failed');
