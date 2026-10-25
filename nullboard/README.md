@@ -38,3 +38,21 @@ CI=true npm run build
 Keep the joke intentional. Buttons must not create real tasks, send invitations, call an AI service, or save progress. Preserve the persistent status region, Escape dismissal and focus restoration when changing feedback. Each feature button exposes whether its joke is open with `aria-expanded` and points to the shared status region with `aria-controls`; keep that target mounted and its ID unique per app instance.
 
 For presentation changes, check narrow screens, enlarged text, both themes, keyboard focus, repeated clicks and dismissal in a browser. Jest's DOM environment cannot validate actual geometry, touch input, or screen-reader announcements.
+
+## GitHub Pages demo deployment
+
+The separate `Deploy GitHub Pages demo` workflow builds this directory with Node.js 24, runs tests, TypeScript and ESLint, and uploads only `nullboard/build`. Pull requests validate the build; pushes to `main` deploy it with the official Pages actions. It can also be run manually from Actions.
+
+One-time repository setup: Settings → Pages → Build and deployment → Source → **GitHub Actions**. The repository About website can be set to https://ishowshao.github.io/NullBoard/.
+
+The workflow sets CRA's `PUBLIC_URL` to `/<repository name>` (here `/NullBoard`), so JS, CSS and `%PUBLIC_URL%` icons load under the project path. Manifest icons and `start_url` are already relative. Local `npm start` stays at `/`; no `gh-pages` branch, backend, credentials or paid service is needed. If a custom domain is introduced, update `PUBLIC_URL` for its base path.
+
+To reproduce the production build locally:
+
+```sh
+PUBLIC_URL=/NullBoard CI=true npm run build
+```
+
+Serve the output mounted at `/NullBoard/`, then check both themes, all five buttons, the unlocked certificate and its copy button. A successful build alone does not establish that Pages is enabled or the live demo is working.
+
+This deployment is separately authorized infrastructure work, not a daily feature increment. Revert the deployment commit to remove the workflow; disable Pages in repository settings to unpublish the site.

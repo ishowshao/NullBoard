@@ -1,0 +1,64 @@
+name: Deploy GitHub Pages demo
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'nullboard/**'
+      - '.github/workflows/pages.yml'
+  pull_request:
+    paths:
+      - 'nullboard/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: nullboard
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: nullboard/package-lock.json
+      - run: npm ci
+      - run: npm test -- --watchAll=false --runInBand
+        env:
+          CI: true
+      - run: npx tsc --noEmit
+      - run: npx eslint src --max-warnings=0
+      - name: Build for the GitHub Pages project path
+        run: npm run build
+        env:
+          CI: true
+          PUBLIC_URL: /${{ github.event.repository.name }}
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: nullboard/build
+
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+      - name: Deploy static demo
+        id: deployment
+        uses: actions/deploy-pages@v4

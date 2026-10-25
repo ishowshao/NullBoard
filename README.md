@@ -6,6 +6,14 @@ A tiny, satirical project management app for developers who have had enough proj
 
 一款完全没有功能的项目管理工具，专为不打算做任何事的开发者而生。五个看起来很有用的按钮，各有一句认真敷衍你的笑话。
 
+## Online demo / 在线试玩
+
+**[Open NullBoard →](https://ishowshao.github.io/NullBoard/)**
+
+No installation or account needed. Try the five different buttons to unlock your Certificate of Nothing.
+
+无需安装或注册，试遍五个不同的按钮即可解锁「虚无证书」。
+
 ## Try the joke in 30 seconds / 30 秒看懂这个玩笑
 
 - Create a new task → “Task created in a parallel universe. This one remains beautifully empty.”
