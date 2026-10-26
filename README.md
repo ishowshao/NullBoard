@@ -26,9 +26,9 @@ The dark/light switch actually works. So do the keyboard controls: Tab to a butt
 
 明暗主题切换是真的，键盘操作也是真的。用 Tab 选中按钮，Enter 或空格打开笑话，Escape 或 “Accept defeat” 关闭提示并返回原按钮。
 
-Found a punchline worth sharing? Choose “Copy this joke” to copy it with the NullBoard name and repository link, so friends can find the original joke. Nothing is posted automatically. If your browser blocks clipboard access, select the joke and copy it manually.
+Found a punchline worth sharing? Choose “Copy this joke” to copy it with the NullBoard name and repository link, so friends can find the original joke. Nothing is posted automatically. If your browser blocks clipboard access, a read-only text field offers the same complete share text for manual copying. Tab into it to select the text.
 
-看到喜欢的笑点，点击 “Copy this joke” 即可复制带项目名称和仓库链接的文案，方便朋友找到原作，不会自动发布到任何平台；若浏览器不允许复制，可选中文案手动复制。
+看到喜欢的笑点，点击 “Copy this joke” 即可复制带项目名称和仓库链接的文案，方便朋友找到原作，不会自动发布到任何平台；若浏览器不允许复制，会显示包含项目链接的完整只读文案，可用 Tab 选中后手动复制。
 
 ## A small reward for doing nothing / 一无所获也有奖
 

@@ -38,11 +38,20 @@ test.each(['missing', 'rejected'])('offers manual copying when the clipboard is 
   render(<App />);
   userEvent.click(screen.getByRole('button', { name: 'Add tags' }));
   userEvent.click(screen.getByRole('button', { name: 'Copy this joke' }));
-  expect(await screen.findByText('Could not copy. Select the joke above and copy it manually.')).toBeInTheDocument();
+  expect(await screen.findByText('Could not copy. Select the text below and copy it manually.')).toBeInTheDocument();
   expect(screen.getByRole('status')).toHaveTextContent('Tag rejected:');
+  const manual = screen.getByRole('textbox', { name: 'Text to copy manually' }) as HTMLTextAreaElement;
+  expect(manual).toHaveAttribute('readonly');
+  expect(manual).toHaveValue('NullBoard Pro Max\n\nTag rejected: even #nothing was too much commitment.\n\nZero tasks. Zero pressure.\nhttps://github.com/ishowshao/NullBoard');
+  expect(screen.getByRole('button', { name: 'Copy this joke' })).toHaveFocus();
+  userEvent.tab();
+  expect(manual).toHaveFocus();
+  expect(manual.selectionStart).toBe(0);
+  expect(manual.selectionEnd).toBe(manual.value.length);
   Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
   userEvent.click(screen.getByRole('button', { name: 'Copy this joke' }));
   expect(await screen.findByText('Joke copied. Productivity remains unchanged.')).toBeInTheDocument();
+  expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
 });
 
 test.each(['resolve', 'reject'])('ignores a late clipboard %s after switching jokes', async (outcome) => {
@@ -100,4 +109,21 @@ test('shares a stable repository link without leaking the current address', asyn
   } finally {
     window.history.replaceState(null, '', originalAddress);
   }
+});
+
+test('removes failed manual-copy text when switching or dismissing a joke', async () => {
+  writeText.mockRejectedValue(new Error('Denied'));
+  render(<App />);
+  userEvent.click(screen.getByRole('button', { name: 'Add tags' }));
+  userEvent.click(screen.getByRole('button', { name: 'Copy this joke' }));
+  await screen.findByRole('textbox', { name: 'Text to copy manually' });
+  userEvent.click(screen.getByRole('button', { name: 'Save your progress' }));
+  expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+  userEvent.click(screen.getByRole('button', { name: 'Copy this joke' }));
+  const manual = await screen.findByRole('textbox', { name: 'Text to copy manually' });
+  expect((manual as HTMLTextAreaElement).value).toContain('Progress saved to your imagination.');
+  userEvent.click(manual);
+  userEvent.keyboard('{Escape}');
+  expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Save your progress' })).toHaveFocus();
 });
