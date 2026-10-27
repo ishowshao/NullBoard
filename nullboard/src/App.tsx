@@ -102,6 +102,12 @@ function App() {
       </div>
       
       <div className="mt-6 w-full max-w-md text-center">
+        <p className="text-sm">
+          {exploredFeatures.size} of {features.length} ways to do nothing discovered.
+        </p>
+        {!achievementUnlocked && (
+          <p className="mt-1 text-sm">Try each different button to unlock a Certificate of Nothing.</p>
+        )}
         <p aria-live="polite" aria-atomic="true">
           {achievementUnlocked ? 'Zero achievement unlocked. You tried everything. Nothing happened.' : ''}
         </p>

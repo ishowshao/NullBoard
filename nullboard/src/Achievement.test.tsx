@@ -86,3 +86,34 @@ test('copies the certificate only on request using the existing honest clipboard
     else Reflect.deleteProperty(navigator, 'clipboard');
   }
 });
+
+
+test('shows discovery progress for distinct jokes without counting repeat clicks or the certificate', () => {
+  render(<App />);
+  const progressText = (count: number) => `${count} of ${features.length} ways to do nothing discovered.`;
+  expect(screen.getByText(progressText(0))).toBeInTheDocument();
+  expect(screen.getByText('Try each different button to unlock a Certificate of Nothing.')).toBeInTheDocument();
+  const first = screen.getByRole('button', { name: features[0].label });
+  userEvent.click(first);
+  userEvent.click(first);
+  expect(screen.getByText(progressText(1))).toBeInTheDocument();
+  expect(screen.getByText(progressText(1))).not.toHaveAttribute('aria-live');
+  expect(first).toHaveFocus();
+  userEvent.keyboard('{Escape}');
+  userEvent.click(screen.getByRole('button', { name: 'Dark mode' }));
+  expect(screen.getByText(progressText(1))).toBeInTheDocument();
+  exploreAll();
+  expect(screen.getByText(progressText(features.length))).toBeInTheDocument();
+  expect(screen.queryByText('Try each different button to unlock a Certificate of Nothing.')).not.toBeInTheDocument();
+  userEvent.click(screen.getByRole('button', { name: certificateName }));
+  expect(screen.getByText(progressText(features.length))).toBeInTheDocument();
+});
+
+test('resets the visible discovery count for a new visit', () => {
+  const { unmount } = render(<App />);
+  exploreAll();
+  unmount();
+  render(<App />);
+  expect(screen.getByText(`0 of ${features.length} ways to do nothing discovered.`)).toBeInTheDocument();
+  expect(screen.getByText('Try each different button to unlock a Certificate of Nothing.')).toBeInTheDocument();
+});
