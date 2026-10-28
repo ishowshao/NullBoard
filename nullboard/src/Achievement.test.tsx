@@ -117,3 +117,49 @@ test('resets the visible discovery count for a new visit', () => {
   expect(screen.getByText(`0 of ${features.length} ways to do nothing discovered.`)).toBeInTheDocument();
   expect(screen.getByText('Try each different button to unlock a Certificate of Nothing.')).toBeInTheDocument();
 });
+
+test.each(['missing', 'rejected'])('keeps the full certificate shareable when the clipboard is %s', async (failure) => {
+  const original = Object.getOwnPropertyDescriptor(navigator, 'clipboard');
+  const writeText = jest.fn().mockRejectedValue(new Error('Permission denied'));
+  Object.defineProperty(navigator, 'clipboard', {
+    configurable: true,
+    value: failure === 'missing' ? undefined : { writeText },
+  });
+  try {
+    render(<App />);
+    exploreAll();
+    const souvenir = screen.getByRole('button', { name: certificateName });
+    userEvent.click(souvenir);
+    expect(writeText).not.toHaveBeenCalled();
+    const copy = screen.getByRole('button', { name: 'Copy this joke' });
+    copy.focus();
+    userEvent.keyboard('{Enter}');
+    const manual = await screen.findByRole('textbox', { name: 'Text to copy manually' }) as HTMLTextAreaElement;
+    const expected = `NullBoard Pro Max\n\n${certificate}\n\nZero tasks. Zero pressure.\nhttps://github.com/ishowshao/NullBoard`;
+    expect(manual).toHaveValue(expected);
+    expect(manual).toHaveAttribute('readonly');
+    expect(copy).toHaveFocus();
+    userEvent.tab();
+    expect(manual).toHaveFocus();
+    expect(manual.selectionStart).toBe(0);
+    expect(manual.selectionEnd).toBe(expected.length);
+    userEvent.click(screen.getByRole('button', { name: 'Dark mode' }));
+    expect(screen.getByRole('textbox', { name: 'Text to copy manually' })).toBe(manual);
+    expect(manual).toHaveValue(expected);
+    expect(manual).toHaveClass('focus-visible:outline-black');
+    manual.focus();
+    userEvent.keyboard('{Escape}');
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+    expect(souvenir).toHaveFocus();
+    expect(souvenir).toHaveAttribute('aria-expanded', 'false');
+    userEvent.keyboard('{Enter}');
+    expect(screen.getByRole('status').textContent).toBe(certificate);
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+    expect(screen.queryByText('Could not copy. Select the text below and copy it manually.')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Copy this joke' })).toBeEnabled();
+    expect(writeText).toHaveBeenCalledTimes(failure === 'missing' ? 0 : 1);
+  } finally {
+    if (original) Object.defineProperty(navigator, 'clipboard', original);
+    else Reflect.deleteProperty(navigator, 'clipboard');
+  }
+});
