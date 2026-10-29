@@ -211,7 +211,7 @@ test('gives every control an explicit button type, touch-target and keyboard-foc
 
   const expectControls = (outline: string) => {
     const buttons = screen.getAllByRole('button');
-    expect(buttons).toHaveLength(8);
+    expect(buttons).toHaveLength(9);
     buttons.forEach((button) => {
       expect(button).toHaveAttribute('type', 'button');
       expect(button).toHaveClass('min-h-[44px]', 'focus-visible:outline', 'focus-visible:outline-2', 'focus-visible:outline-offset-2', outline);

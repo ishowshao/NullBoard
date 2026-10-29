@@ -4,6 +4,8 @@ type CopyState = 'idle' | 'copying' | 'copied' | 'failed';
 
 export default function CopyJoke({ message, className }: { message: string; className: string }) {
   const [state, setState] = useState<CopyState>('idle');
+  const [manualCopyRequested, setManualCopyRequested] = useState(false);
+  const showManualCopy = manualCopyRequested || state === 'failed';
   const manualCopyId = useId();
   const shareText = `NullBoard Pro Max\n\n${message}\n\nZero tasks. Zero pressure.\nhttps://github.com/ishowshao/NullBoard`;
   const mounted = useRef(false);
@@ -30,27 +32,40 @@ export default function CopyJoke({ message, className }: { message: string; clas
 
   return (
     <div className="mt-4 text-center">
-      <button type="button" className={className} onClick={copy} disabled={state === 'copying'}>
-        Copy this joke
-      </button>
+      <div className="flex flex-wrap justify-center gap-2">
+        <button type="button" className={className} onClick={copy} disabled={state === 'copying'}>
+          Copy this joke
+        </button>
+        <button
+          type="button"
+          className={className}
+          aria-expanded={showManualCopy}
+          aria-controls={`${manualCopyId}-panel`}
+          onClick={() => setManualCopyRequested(true)}
+        >
+          Copy manually
+        </button>
+      </div>
       <p className="mt-2 text-sm" aria-live="polite" aria-atomic="true">
         {state === 'copying' && 'Copying nothing…'}
         {state === 'copied' && 'Joke copied. Productivity remains unchanged.'}
         {state === 'failed' && 'Could not copy. Select the text below and copy it manually.'}
       </p>
-      {state === 'failed' && (
-        <div className="mt-2">
-          <label htmlFor={manualCopyId} className="block text-sm">Text to copy manually</label>
-          <textarea
-            id={manualCopyId}
-            readOnly
-            rows={6}
-            value={shareText}
-            className={`mt-2 w-full text-sm ${className}`}
-            onFocus={(event) => event.currentTarget.select()}
-          />
-        </div>
-      )}
+      <div id={`${manualCopyId}-panel`} hidden={!showManualCopy}>
+        {showManualCopy && (
+          <div className="mt-2">
+            <label htmlFor={manualCopyId} className="block text-sm">Text to copy manually</label>
+            <textarea
+              id={manualCopyId}
+              readOnly
+              rows={6}
+              value={shareText}
+              className={`mt-2 w-full text-sm ${className}`}
+              onFocus={(event) => event.currentTarget.select()}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

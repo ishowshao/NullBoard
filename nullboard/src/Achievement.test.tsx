@@ -140,6 +140,8 @@ test.each(['missing', 'rejected'])('keeps the full certificate shareable when th
     expect(manual).toHaveAttribute('readonly');
     expect(copy).toHaveFocus();
     userEvent.tab();
+    expect(screen.getByRole('button', { name: 'Copy manually' })).toHaveFocus();
+    userEvent.tab();
     expect(manual).toHaveFocus();
     expect(manual.selectionStart).toBe(0);
     expect(manual.selectionEnd).toBe(expected.length);

@@ -28,7 +28,7 @@ CI=true npm run build
 
 - `src/features.ts`: the five fake features, their distinct punchlines and the Certificate of Nothing souvenir.
 - `src/App.tsx`: layout, session-only discovery of the five jokes, theme state, live feedback and keyboard dismissal.
-- `src/CopyJoke.tsx`: user-triggered clipboard sharing with success feedback and a labeled, read-only full-text fallback when clipboard access fails. The parent keys this component by feature ID so a pending copy cannot update a different joke.
+- `src/CopyJoke.tsx`: user-triggered clipboard sharing with success feedback and a labeled, read-only full-text fallback. “Copy manually” exposes that text without clipboard permission or waiting for a pending request; a late clipboard result does not remove explicitly requested text. The parent keys this component by feature ID so a pending copy cannot update a different joke.
 - `src/App.test.tsx`: interaction and accessible-control regression coverage.
 - `src/Achievement.test.tsx`: distinct-feature discovery and visible progress, certificate keyboard controls, reset on remount and opt-in copying.
 - `src/CopyJoke.test.tsx`: clipboard success, rejection, missing API, full-text manual selection, retry, keyboard activation and stale asynchronous results.
