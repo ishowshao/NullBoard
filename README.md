@@ -77,7 +77,7 @@ Tests cover the actual jokes, repeated interactions, dismissal, focus, themes an
 
 ## Keep nothing interesting / 让“什么也不做”更有趣
 
-Start with [the roadmap](nullboard/ROADMAP.md) and [development notes](nullboard/README.md). Punchlines live in [`features.ts`](nullboard/src/features.ts); their expected behavior lives in [`App.test.tsx`](nullboard/src/App.test.tsx).
+Start with [the roadmap](nullboard/ROADMAP.md), [contribution guide](CONTRIBUTING.md), and [development notes](nullboard/README.md). Punchlines live in [`features.ts`](nullboard/src/features.ts); their expected behavior lives in [`App.test.tsx`](nullboard/src/App.test.tsx).
 
 Small jokes, clearer presentation, accessibility fixes and reliable tests are welcome. Keep it lightweight: no real task management, accounts, backend, or data collection. If it made you smile, a Star is a nice way to bookmark the joke.
 
