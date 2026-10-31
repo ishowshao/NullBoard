@@ -76,9 +76,13 @@ test.each(['resolve', 'reject'])('ignores a late clipboard %s after switching jo
   expect(writeText).toHaveBeenLastCalledWith(expect.stringContaining('Progress saved to your imagination.'));
 });
 
-test('dismisses a pending copy with Escape and reopens without stale feedback', async () => {
-  let resolve!: () => void;
-  writeText.mockImplementationOnce(() => new Promise<void>((done) => { resolve = done; }));
+test.each(['resolve', 'reject'])('ignores a late clipboard %s after Escape and reopening the same joke', async (outcome) => {
+  let resolveOld!: () => void;
+  let rejectOld!: (error: Error) => void;
+  let resolveNew!: () => void;
+  writeText
+    .mockImplementationOnce(() => new Promise<void>((done, fail) => { resolveOld = done; rejectOld = fail; }))
+    .mockImplementationOnce(() => new Promise<void>((done) => { resolveNew = done; }));
   render(<App />);
   const trigger = screen.getByRole('button', { name: 'Add tags' });
   userEvent.click(trigger);
@@ -87,11 +91,30 @@ test('dismisses a pending copy with Escape and reopens without stale feedback', 
   expect(trigger).toHaveFocus();
   expect(screen.queryByRole('button', { name: 'Copy this joke' })).not.toBeInTheDocument();
   userEvent.keyboard('{Enter}');
-  await act(async () => resolve());
+  const reopenedCopy = screen.getByRole('button', { name: 'Copy this joke' });
+  expect(reopenedCopy).toBeEnabled();
+  expect(trigger).toHaveFocus();
   expect(screen.queryByText(/Joke copied|Could not copy|Copying nothing/)).not.toBeInTheDocument();
-  expect(screen.getByRole('button', { name: 'Copy this joke' })).toBeEnabled();
+  expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+
+  // The old request must not finish or fail the new instance's pending copy.
+  userEvent.click(reopenedCopy);
+  await act(async () => { if (outcome === 'resolve') resolveOld(); else rejectOld(new Error('Denied')); });
+  expect(screen.getByText('Copying nothing…')).toBeInTheDocument();
+  expect(reopenedCopy).toBeDisabled();
+  expect(screen.queryByText(/Joke copied|Could not copy/)).not.toBeInTheDocument();
+  expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Copy manually' })).toHaveAttribute('aria-expanded', 'false');
+  expect(reopenedCopy).toHaveFocus();
+  expect(writeText).toHaveBeenCalledTimes(2);
+
+  await act(async () => resolveNew());
+  expect(screen.getByText('Joke copied. Productivity remains unchanged.')).toBeInTheDocument();
+  expect(reopenedCopy).toBeEnabled();
+  expect(reopenedCopy).toHaveFocus();
   userEvent.click(screen.getByRole('button', { name: 'Accept defeat' }));
   expect(screen.queryByRole('button', { name: 'Copy this joke' })).not.toBeInTheDocument();
+  expect(trigger).toHaveFocus();
 });
 
 test('shares a stable repository link without leaking the current address', async () => {
