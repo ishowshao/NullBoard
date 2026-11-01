@@ -258,6 +258,25 @@ test.each(['{Enter}', ' '])('exposes the active joke and its feedback target wit
   expect(screen.getByRole('status')).toBeEmptyDOMElement();
 });
 
+test('offers a keyboard-reachable source link without losing the current joke or progress', () => {
+  render(<App />);
+  const source = screen.getByRole('link', { name: 'View source on GitHub (opens in a new tab)' });
+  expect(source).toHaveAttribute('href', 'https://github.com/ishowshao/NullBoard');
+  expect(source).toHaveAttribute('target', '_blank');
+  expect(source).toHaveAttribute('rel', 'noopener noreferrer');
+  expect(source).toHaveClass('min-h-[44px]', 'focus-visible:outline-white');
+  userEvent.click(screen.getByRole('button', { name: 'Add tags' }));
+  const message = screen.getByRole('status').textContent;
+  screen.getByRole('button', { name: 'Accept defeat' }).focus();
+  userEvent.tab();
+  expect(source).toHaveFocus();
+  expect(screen.getByRole('status')).toHaveTextContent(message!);
+  expect(screen.getByText('1 of 5 ways to do nothing discovered.')).toBeInTheDocument();
+  userEvent.click(screen.getByRole('button', { name: 'Dark mode' }));
+  expect(source).toHaveClass('focus-visible:outline-black');
+  expect(source).toHaveAttribute('href', 'https://github.com/ishowshao/NullBoard');
+});
+
 test('keeps feedback relationships unique when two app instances are mounted', () => {
   render(<><App /><App /></>);
   const buttons = screen.getAllByRole('button', { name: 'Add tags' });

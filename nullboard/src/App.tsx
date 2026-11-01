@@ -127,6 +127,14 @@ function App() {
       <footer className={`mt-auto pt-8 max-w-2xl text-center ${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm`}>
         <p>NullBoard: Because the backend is the root obstacle to dreams.</p>
         <p>Each interaction will remind you: "Why are you still working on this?"</p>
+        <a
+          href="https://github.com/ishowshao/NullBoard"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`inline-flex items-center min-h-[44px] mt-2 px-3 py-2 rounded underline underline-offset-4 ${buttonFocus}`}
+        >
+          View source on GitHub (opens in a new tab)
+        </a>
       </footer>
     </main>
   );
