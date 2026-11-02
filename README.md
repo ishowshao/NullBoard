@@ -1,3 +1,22 @@
+# NullBoard · 清空待办局
+
+**努力工作，直到所有工作都不存在。**
+
+[立即试玩 / Play now](https://ishowshao.github.io/NullBoard/)
+
+NullBoard is now a tiny, static puzzle game about making work disappear. Click a square to toggle it and its orthogonal neighbors. Clear all 16 squares, survive three departments, and become the Chief Nothing Officer. No timer, account, backend, or telemetry.
+
+## 怎么玩
+
+- 点击任意格子，翻转它与上下左右相邻格子；空格也可以点。
+- 全部变成「空」即可过关，三关通关可重新入职。
+- 可以无限撤销、重开本关；无计时压力，手机触控和键盘 Tab / Enter / 空格均可操作。
+- 本次游戏不保存进度，刷新从第一关开始。旧版假工具与虚无证书仍可通过页脚「博物馆」体验，返回时保留本局。
+
+2026-11-02 起每日小步扩展可玩体验，并发布到现有 GitHub Pages。以下保留旧版博物馆说明，运行与贡献命令仍适用。
+
+---
+
 # NullBoard Pro Max
 
 **Zero tasks. Zero pressure. 50% more nothing.**

@@ -1,3 +1,7 @@
+# Current product direction (2026-11-02)
+
+The default entry now renders `src/Game.tsx`: a static, humorous puzzle game. Pure logic and solvable level definitions are in `src/game.ts`, styles in `src/game.css`, regression coverage in `src/Game.test.tsx`. `App.tsx` remains the original tool museum, reachable from the game. Preserve both paths. Follow the current `nullboard/ROADMAP.md`; the older feature list below describes the museum, not the default homepage. Daily publication to the existing GitHub Pages site is authorized; do not add services, credentials or fees.
+
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
