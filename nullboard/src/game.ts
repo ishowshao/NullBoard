@@ -4,6 +4,7 @@ export const levels = [
   { name: '入职培训', memo: '只要再点一下，事情就会少一点。也可能多一点。', scramble: [5, 10] },
   { name: '跨部门协作', memo: '你处理的不是待办，是待办的亲戚。', scramble: [0, 6, 15] },
   { name: '季度归零', memo: '本季度 KPI：没有任何 KPI。', scramble: [1, 4, 10, 15] },
+  { name: '需求复活会', memo: '恭喜清完！会议决定把需求重新加回来。', scramble: [0, 3, 5, 8, 12, 15] },
 ];
 export function toggle(board: boolean[], index: number): boolean[] {
   if (!Number.isInteger(index) || index < 0 || index >= SIZE * SIZE) return board;

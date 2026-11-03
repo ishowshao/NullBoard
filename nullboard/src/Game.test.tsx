@@ -36,7 +36,7 @@ test('play, undo, restart and museum round trip preserve the current game', () =
   initialBoard(0).forEach((on, i) => expect(cell(i)).toHaveAttribute('aria-pressed', String(on)));
 });
 
-test('three levels can be completed, undo reverses victory, replay starts fresh', () => {
+test('all levels can be completed, undo reverses victory, replay starts fresh', () => {
   render(<Game />);
   levels.forEach((level, i) => {
     level.scramble.forEach(index => fireEvent.click(cell(index)));
@@ -45,7 +45,7 @@ test('three levels can be completed, undo reverses victory, replay starts fresh'
   });
   expect(screen.getByRole('status')).toHaveTextContent('首席虚无官');
   fireEvent.click(screen.getByRole('button', { name: /重新入职/ }));
-  expect(screen.getByText('第 1 / 3 关 · 入职培训')).toBeInTheDocument();
+  expect(screen.getByText('第 1 / 4 关 · 入职培训')).toBeInTheDocument();
   expect(screen.getByRole('button', { name: '撤销' })).toBeDisabled();
 });
 
