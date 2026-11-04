@@ -1,7 +1,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import Game from './Game';
-import { initialBoard, levels, SIZE, toggle } from './game';
+import { adjacentCell, initialBoard, levels, SIZE, toggle } from './game';
 
 function cell(index: number) { return screen.getByRole('button', { name: new RegExp(`第${Math.floor(index / SIZE) + 1}行第${index % SIZE + 1}列`) }); }
 
@@ -45,7 +45,7 @@ test('all levels can be completed, undo reverses victory, replay starts fresh', 
   });
   expect(screen.getByRole('status')).toHaveTextContent('首席虚无官');
   fireEvent.click(screen.getByRole('button', { name: /重新入职/ }));
-  expect(screen.getByText('第 1 / 4 关 · 入职培训')).toBeInTheDocument();
+  expect(screen.getByText(`第 1 / ${levels.length} 关 · 入职培训`)).toBeInTheDocument();
   expect(screen.getByRole('button', { name: '撤销' })).toBeDisabled();
 });
 
@@ -58,4 +58,22 @@ test('undo reverses victory and hides advancement', () => {
   expect(screen.queryByRole('button', { name: /下一关/ })).not.toBeInTheDocument();
   fireEvent.click(cell(10));
   expect(screen.getByRole('button', { name: /下一关/ })).toBeInTheDocument();
+});
+
+
+test('arrow navigation keeps focus inside the board without making moves', () => {
+  render(<Game />);
+  cell(0).focus();
+  fireEvent.keyDown(cell(0), { key: 'ArrowRight' });
+  expect(cell(1)).toHaveFocus();
+  fireEvent.keyDown(cell(1), { key: 'ArrowDown' });
+  expect(cell(5)).toHaveFocus();
+  expect(screen.getByRole('button', { name: '撤销' })).toBeDisabled();
+  cell(3).focus();
+  fireEvent.keyDown(cell(3), { key: 'ArrowRight' });
+  expect(cell(3)).toHaveFocus();
+  expect(adjacentCell(0, 'ArrowUp')).toBe(0);
+  expect(adjacentCell(12, 'ArrowDown')).toBe(12);
+  expect(adjacentCell(4, 'ArrowLeft')).toBe(4);
+  expect(adjacentCell(5, 'Enter')).toBe(5);
 });
