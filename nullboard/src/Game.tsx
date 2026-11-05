@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import App from './App';
-import { adjacentCell, initialBoard, levels, SIZE, toggle } from './game';
+import { adjacentCell, initialBoard, levels, SIZE, solve, toggle } from './game';
 import './game.css';
 
 export default function Game() {
@@ -8,12 +8,13 @@ export default function Game() {
   const [museum, setMuseum] = useState(false);
   const [level, setLevel] = useState(0);
   const [board, setBoard] = useState(() => initialBoard(0));
+  const [hint, setHint] = useState<number | null>(null);
   const [history, setHistory] = useState<boolean[][]>([]);
   const remaining = board.filter(Boolean).length;
   const won = remaining === 0;
   const final = level === levels.length - 1;
   function restart(next = level) {
-    setLevel(next); setBoard(initialBoard(next)); setHistory([]);
+    setLevel(next); setBoard(initialBoard(next)); setHistory([]); setHint(null);
   }
   if (museum) return <><div className="museum-return"><button onClick={() => setMuseum(false)}>← 返回清空待办局 · 保留本局</button></div><App /></>;
   return (
@@ -30,9 +31,10 @@ export default function Game() {
             <div className="game-board-top"><span>第 {level + 1} / {levels.length} 关 · {levels[level].name}</span><span>剩余 <strong>{remaining}</strong></span></div>
             <p id="board-help" className="game-rule">点击任意格子，翻转它和上下左右的格子。让所有格子变成「空」，即可下班。键盘方向键移动，空格或回车翻转。</p>
             <div className="task-grid" aria-describedby="board-help">
-              {board.map((active, index) => <button key={index} ref={el => { cells.current[index] = el; }} onKeyDown={event => { if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) { event.preventDefault(); cells.current[adjacentCell(index, event.key)]?.focus(); } }} className={`task-cell ${active ? 'task-active' : ''}`} aria-label={`第${Math.floor(index / SIZE) + 1}行第${index % SIZE + 1}列：${active ? '待办' : '空'}`} aria-pressed={active} disabled={won} onClick={() => { setHistory([...history, board]); setBoard(toggle(board, index)); }}><span aria-hidden="true">{active ? '▣' : '·'}</span><small>{active ? '待办' : '空'}</small></button>)}
+              {board.map((active, index) => <button key={index} ref={el => { cells.current[index] = el; }} onKeyDown={event => { if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) { event.preventDefault(); cells.current[adjacentCell(index, event.key)]?.focus(); } }} className={`task-cell ${active ? 'task-active' : ''} ${hint === index ? 'task-hint' : ''}`} aria-label={`第${Math.floor(index / SIZE) + 1}行第${index % SIZE + 1}列：${active ? '待办' : '空'}${hint === index ? '，建议点击' : ''}`} aria-pressed={active} disabled={won} onClick={() => { setHistory([...history, board]); setBoard(toggle(board, index)); setHint(null); }}><span aria-hidden="true">{active ? '▣' : '·'}</span><small>{active ? '待办' : '空'}</small></button>)}
             </div>
-            <div className="game-controls"><span>已操作 <strong>{history.length}</strong> 次</span><button disabled={!history.length} onClick={() => { setBoard(history[history.length - 1]); setHistory(history.slice(0, -1)); }}>撤销</button><button onClick={() => restart()}>重开本关</button></div>
+            <div className="game-controls"><span>已操作 <strong>{history.length}</strong> 次</span><button disabled={!history.length} onClick={() => { setBoard(history[history.length - 1]); setHistory(history.slice(0, -1)); setHint(null); }}>撤销</button><button disabled={won} onClick={() => setHint(solve(board)?.[0] ?? null)}>求助同事</button><button onClick={() => restart()}>重开本关</button></div>
+            <p className="hint-message" role="status">{hint !== null ? `同事建议：点击第 ${Math.floor(hint / SIZE) + 1} 行第 ${hint % SIZE + 1} 列。` : '卡住了？可以请同事指点一步。'}</p>
           </section>
           <aside className="game-notes">
             <div className="game-stamp" aria-hidden="true">{won ? '准予下班' : '正在假装忙碌'}</div>
@@ -42,7 +44,7 @@ export default function Game() {
             {won && <button className="game-next" onClick={() => restart(final ? 0 : level + 1)}>{final ? '重新入职' : '下一关：更多无用之事'} →</button>}
           </aside>
         </div>
-        <footer className="game-footer"><p>不保存、不上传、不产生绩效。刷新从第一关开始。</p><button onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.3 · 2026.11.04</span></footer>
+        <footer className="game-footer"><p>不保存、不上传、不产生绩效。刷新从第一关开始。</p><button onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.4 · 2026.11.05</span></footer>
       </div>
     </main>
   );

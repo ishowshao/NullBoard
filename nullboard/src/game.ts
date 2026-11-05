@@ -24,3 +24,23 @@ export function adjacentCell(index: number, key: string): number {
   if (key === 'ArrowDown' && row < SIZE - 1) return index + SIZE;
   return index;
 }
+
+// Try each possible first row, then clear each preceding row greedily.
+// Every reachable board has a solution; return the shortest candidate.
+export function solve(board: boolean[]): number[] | null {
+  if (board.length !== SIZE * SIZE) return null;
+  let best: number[] | null = null;
+  for (let first = 0; first < (1 << SIZE); first += 1) {
+    let work = board.slice();
+    const moves: number[] = [];
+    const press = (index: number) => { work = toggle(work, index); moves.push(index); };
+    for (let col = 0; col < SIZE; col += 1) if (first & (1 << col)) press(col);
+    for (let row = 1; row < SIZE; row += 1) {
+      for (let col = 0; col < SIZE; col += 1) {
+        if (work[(row - 1) * SIZE + col]) press(row * SIZE + col);
+      }
+    }
+    if (!work.some(Boolean) && (best === null || moves.length < best.length)) best = moves;
+  }
+  return best;
+}

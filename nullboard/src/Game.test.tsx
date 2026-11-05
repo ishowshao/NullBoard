@@ -1,7 +1,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import Game from './Game';
-import { adjacentCell, initialBoard, levels, SIZE, toggle } from './game';
+import { adjacentCell, initialBoard, levels, SIZE, solve, toggle } from './game';
 
 function cell(index: number) { return screen.getByRole('button', { name: new RegExp(`第${Math.floor(index / SIZE) + 1}行第${index % SIZE + 1}列`) }); }
 
@@ -43,7 +43,7 @@ test('all levels can be completed, undo reverses victory, replay starts fresh', 
     expect(cell(0)).toBeDisabled();
     if (i < levels.length - 1) fireEvent.click(screen.getByRole('button', { name: /下一关/ }));
   });
-  expect(screen.getByRole('status')).toHaveTextContent('首席虚无官');
+  expect(screen.getByText(/首席虚无官/)).toHaveTextContent('首席虚无官');
   fireEvent.click(screen.getByRole('button', { name: /重新入职/ }));
   expect(screen.getByText(`第 1 / ${levels.length} 关 · 入职培训`)).toBeInTheDocument();
   expect(screen.getByRole('button', { name: '撤销' })).toBeDisabled();
@@ -76,4 +76,28 @@ test('arrow navigation keeps focus inside the board without making moves', () =>
   expect(adjacentCell(12, 'ArrowDown')).toBe(12);
   expect(adjacentCell(4, 'ArrowLeft')).toBe(4);
   expect(adjacentCell(5, 'Enter')).toBe(5);
+});
+
+
+test('solver finds a route from every level and after arbitrary moves', () => {
+  levels.forEach((_level, index) => {
+    const board = [0, 7, 12].reduce(toggle, initialBoard(index));
+    const solution = solve(board);
+    expect(solution).not.toBeNull();
+    expect(solution!.reduce(toggle, board).some(Boolean)).toBe(false);
+  });
+  expect(solve(Array<boolean>(16).fill(false))).toEqual([]);
+});
+
+test('asking for a hint does not move; playing it and undo clear the hint', () => {
+  render(<Game />);
+  fireEvent.click(screen.getByRole('button', { name: '求助同事' }));
+  const suggested = screen.getByRole('button', { name: /建议点击/ });
+  expect(screen.getByRole('button', { name: '撤销' })).toBeDisabled();
+  expect(screen.getByText(/同事建议：点击/)).toBeInTheDocument();
+  fireEvent.click(suggested);
+  expect(screen.queryByRole('button', { name: /建议点击/ })).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: '求助同事' }));
+  fireEvent.click(screen.getByRole('button', { name: '撤销' }));
+  expect(screen.queryByRole('button', { name: /建议点击/ })).not.toBeInTheDocument();
 });
