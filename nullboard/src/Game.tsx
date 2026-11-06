@@ -13,6 +13,7 @@ export default function Game() {
   const remaining = board.filter(Boolean).length;
   const won = remaining === 0;
   const final = level === levels.length - 1;
+  const optimal = solve(initialBoard(level))?.length;
   function restart(next = level) {
     setLevel(next); setBoard(initialBoard(next)); setHistory([]); setHint(null);
   }
@@ -41,10 +42,11 @@ export default function Game() {
             <h2>今日工作指示</h2><p>{levels[level].memo}</p>
             <ul><li>亮格是待办，暗格是虚无。</li><li>空格也能点，邻居也会变。</li><li>无倒计时，可无限撤销。</li></ul>
             <div className="game-result" role="status" aria-atomic="true">{won ? (final ? `全部 ${levels.length} 关通关！你用 ${history.length} 次操作完成最后一关。获封「首席虚无官」。` : `本关已清空！你用 ${history.length} 次操作，成功创造了零价值。`) : `还有 ${remaining} 项待办。真实产出：始终为 0。`}</div>
+            {won && optimal !== undefined && <p className="game-score" role="status">{history.length === optimal ? `完美摸鱼：${optimal} 步，已达到本关最少步数！` : `本关最少 ${optimal} 步，你用了 ${history.length} 步。重开试试更快下班？`} 提示可用，撤销不计入步数。</p>}
             {won && <button className="game-next" onClick={() => restart(final ? 0 : level + 1)}>{final ? '重新入职' : '下一关：更多无用之事'} →</button>}
           </aside>
         </div>
-        <footer className="game-footer"><p>不保存、不上传、不产生绩效。刷新从第一关开始。</p><button onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.4 · 2026.11.05</span></footer>
+        <footer className="game-footer"><p>不保存、不上传、不产生绩效。刷新从第一关开始。</p><button onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.5 · 2026.11.06</span></footer>
       </div>
     </main>
   );

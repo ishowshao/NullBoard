@@ -101,3 +101,19 @@ test('asking for a hint does not move; playing it and undo clear the hint', () =
   fireEvent.click(screen.getByRole('button', { name: '撤销' }));
   expect(screen.queryByRole('button', { name: /建议点击/ })).not.toBeInTheDocument();
 });
+
+
+test('victory compares moves to the optimum and undo or restart clears the result', () => {
+  render(<Game />);
+  levels[0].scramble.forEach(index => fireEvent.click(cell(index)));
+  expect(screen.getByText(/完美摸鱼：2 步/)).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: '撤销' }));
+  expect(screen.queryByText(/完美摸鱼/)).not.toBeInTheDocument();
+  fireEvent.click(cell(10));
+  fireEvent.click(screen.getByRole('button', { name: '重开本关' }));
+  fireEvent.click(cell(0)); fireEvent.click(cell(0));
+  levels[0].scramble.forEach(index => fireEvent.click(cell(index)));
+  expect(screen.getByText(/本关最少 2 步，你用了 4 步/)).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: /下一关/ }));
+  expect(screen.queryByText(/本关最少/)).not.toBeInTheDocument();
+});

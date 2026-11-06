@@ -2,3 +2,5 @@
 
 .task-cell.task-hint { outline: 3px solid #ffcf70; outline-offset: 2px; }
 .hint-message { color: #ffcf70; font-size: 13px; line-height: 1.6; margin: 12px 0 0; }
+
+.game-score { border: 1px solid #849a54; border-radius: 8px; padding: 12px; color: #d9f780; line-height: 1.7; }
