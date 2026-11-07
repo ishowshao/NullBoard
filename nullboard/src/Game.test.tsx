@@ -1,7 +1,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import Game from './Game';
-import { adjacentCell, initialBoard, levels, SIZE, solve, toggle } from './game';
+import { adjacentCell, initialBoard, levels, overtimeBoard, SIZE, solve, toggle } from './game';
 
 function cell(index: number) { return screen.getByRole('button', { name: new RegExp(`第${Math.floor(index / SIZE) + 1}行第${index % SIZE + 1}列`) }); }
 
@@ -116,4 +116,91 @@ test('victory compares moves to the optimum and undo or restart clears the resul
   expect(screen.getByText(/本关最少 2 步，你用了 4 步/)).toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: /下一关/ }));
   expect(screen.queryByText(/本关最少/)).not.toBeInTheDocument();
+});
+
+test('overtime draws are reachable, nontrivial and different from the previous board', () => {
+  // A deterministic stream exercises many draws without making the test flaky.
+  let seed = 7;
+  const random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 0x100000000; };
+  let previous: boolean[] | null = null;
+  for (let draw = 0; draw < 100; draw += 1) {
+    const board = overtimeBoard(previous, random);
+    const solution = solve(board)!;
+    expect(board).toHaveLength(SIZE * SIZE);
+    expect(board).not.toEqual(previous);
+    expect(solution.length).toBeGreaterThanOrEqual(3);
+    expect(solution.length).toBeLessThanOrEqual(4);
+    expect(solution.reduce(toggle, board).some(Boolean)).toBe(false);
+    previous = board;
+  }
+});
+
+test('overtime retries are bounded and fallback cannot repeat the previous board', () => {
+  const random = jest.fn(() => 0);
+  const first = overtimeBoard(null, random);
+  random.mockClear();
+  const second = overtimeBoard(first, random);
+  expect(random).toHaveBeenCalledTimes(24 * 4);
+  expect(second).not.toEqual(first);
+  expect(solve(second)!.length).toBeGreaterThanOrEqual(3);
+  // A new four-move draw differs from the three-move fallback too.
+  const repeating = jest.fn().mockReturnValue(0);
+  const third = overtimeBoard(second, repeating);
+  expect(third).not.toEqual(second);
+  expect(third).toEqual(first);
+  expect(solve(third)!.length).toBeLessThanOrEqual(4);
+});
+
+test('overtime unlocks after the finale, keeps its board on restart and museum visits, and can be replayed', () => {
+  render(<Game />);
+  expect(screen.queryByRole('button', { name: /抽一份临时待办/ })).not.toBeInTheDocument();
+  levels.forEach((level, i) => {
+    level.scramble.forEach(index => fireEvent.click(cell(index)));
+    if (i < levels.length - 1) fireEvent.click(screen.getByRole('button', { name: /下一关/ }));
+  });
+  fireEvent.click(screen.getByRole('button', { name: /^抽一份临时待办/ }));
+  expect(screen.getByText('番外 · 临时加班')).toBeInTheDocument();
+  expect(cell(0)).toHaveFocus();
+  expect(screen.queryByText(/首席虚无官/)).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: '撤销' })).toBeDisabled();
+  const original = Array.from({ length: 16 }, (_, i) => cell(i).getAttribute('aria-pressed') === 'true');
+  fireEvent.click(screen.getByRole('button', { name: '求助同事' }));
+  fireEvent.click(screen.getByRole('button', { name: /建议点击/ }));
+  fireEvent.click(screen.getByRole('button', { name: '求助同事' }));
+  const partial = Array.from({ length: 16 }, (_, i) => cell(i).getAttribute('aria-pressed'));
+  const hintLabel = screen.getByRole('button', { name: /建议点击/ }).getAttribute('aria-label');
+  fireEvent.click(screen.getByRole('button', { name: /参观旧版/ }));
+  fireEvent.click(screen.getByRole('button', { name: /返回清空/ }));
+  partial.forEach((on, i) => expect(cell(i)).toHaveAttribute('aria-pressed', on));
+  expect(screen.getByRole('button', { name: /建议点击/ })).toHaveAttribute('aria-label', hintLabel);
+  expect(screen.getByRole('button', { name: '撤销' })).toBeEnabled();
+  fireEvent.click(screen.getByRole('button', { name: '撤销' }));
+  original.forEach((on, i) => expect(cell(i)).toHaveAttribute('aria-pressed', String(on)));
+  fireEvent.click(cell(0));
+  fireEvent.click(screen.getByRole('button', { name: '求助同事' }));
+  fireEvent.click(screen.getByRole('button', { name: '重开本关' }));
+  original.forEach((on, i) => expect(cell(i)).toHaveAttribute('aria-pressed', String(on)));
+  expect(screen.queryByRole('button', { name: /建议点击/ })).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: '撤销' })).toBeDisabled();
+  fireEvent.click(screen.getByRole('button', { name: /参观旧版/ }));
+  fireEvent.click(screen.getByRole('button', { name: /返回清空/ }));
+  expect(screen.getByText('番外 · 临时加班')).toBeInTheDocument();
+  original.forEach((on, i) => expect(cell(i)).toHaveAttribute('aria-pressed', String(on)));
+  solve(original)!.forEach(index => fireEvent.click(cell(index)));
+  expect(screen.getByText(/临时待办已清空/)).toBeInTheDocument();
+  expect(screen.getByText(/完美摸鱼/)).toHaveTextContent(`完美摸鱼：${solve(original)!.length} 步`);
+  fireEvent.click(screen.getByRole('button', { name: '撤销' }));
+  expect(screen.queryByRole('button', { name: /再抽一份/ })).not.toBeInTheDocument();
+  const remaining = Array.from({ length: 16 }, (_, i) => cell(i).getAttribute('aria-pressed') === 'true');
+  solve(remaining)!.forEach(index => fireEvent.click(cell(index)));
+  fireEvent.click(screen.getByRole('button', { name: /再抽一份临时待办/ }));
+  const next = Array.from({ length: 16 }, (_, i) => cell(i).getAttribute('aria-pressed') === 'true');
+  expect(next).not.toEqual(original);
+  expect(screen.getByRole('button', { name: '撤销' })).toBeDisabled();
+  expect(cell(0)).toHaveFocus();
+  expect(screen.queryByText(/完美摸鱼/)).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: /重新入职/ }));
+  expect(screen.queryByText('番外 · 临时加班')).not.toBeInTheDocument();
+  initialBoard(0).forEach((on, i) => expect(cell(i)).toHaveAttribute('aria-pressed', String(on)));
+  expect(cell(0)).toHaveFocus();
 });

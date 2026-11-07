@@ -4,3 +4,4 @@
 .hint-message { color: #ffcf70; font-size: 13px; line-height: 1.6; margin: 12px 0 0; }
 
 .game-score { border: 1px solid #849a54; border-radius: 8px; padding: 12px; color: #d9f780; line-height: 1.7; }
+.game-return { display: block; margin-top: 12px; min-height: 44px; width: 100%; padding: 10px; border: 1px solid #56675c; border-radius: 8px; }

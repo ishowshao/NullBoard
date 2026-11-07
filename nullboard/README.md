@@ -26,6 +26,8 @@ CI=true npm run build
 
 ## Where to edit
 
+- `src/Game.tsx`, `src/game.ts`, `src/game.css`: the default five-level puzzle and optional random overtime challenges after the finale. Overtime boards are generated from legal moves, have a 3–4 move optimum, never immediately repeat, and stay unchanged on restart. No progress is persisted.
+- `src/Game.test.tsx`: puzzle logic, shortest solutions, keyboard navigation, hints, undo, restart, museum round trips, bounded random draws and overtime replay.
 - `src/features.ts`: the five fake features, their distinct punchlines and the Certificate of Nothing souvenir. See the [contribution guide](../CONTRIBUTING.md) before changing IDs or adding entries.
 - `src/features.test.ts`: unique slug IDs, separate certificate, and distinct non-empty labels and punchlines.
 - `src/App.tsx`: layout, session-only discovery of the five jokes, theme state, live feedback and keyboard dismissal.

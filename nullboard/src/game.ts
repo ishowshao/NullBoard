@@ -44,3 +44,20 @@ export function solve(board: boolean[]): number[] | null {
   }
   return best;
 }
+
+// Draw a fresh, reachable board with a short but nontrivial solution.
+// Bound retries so even a repeated random value cannot trap the player.
+export function overtimeBoard(previous: boolean[] | null = null, random = Math.random): boolean[] {
+  const differs = (candidate: boolean[]) => !previous || candidate.some((value, i) => value !== previous[i]);
+  for (let attempt = 0; attempt < 24; attempt += 1) {
+    const available = Array.from({ length: SIZE * SIZE }, (_, i) => i);
+    let candidate = Array<boolean>(SIZE * SIZE).fill(false);
+    for (let move = 0; move < 4; move += 1) {
+      const index = available.splice(Math.floor(random() * available.length), 1)[0];
+      candidate = toggle(candidate, index);
+    }
+    if ((solve(candidate)?.length ?? 0) >= 3 && differs(candidate)) return candidate;
+  }
+  // These distinct, verified 3–4 move boards are also safe offline fallbacks.
+  return [initialBoard(1), initialBoard(2)].find(differs)!;
+}
