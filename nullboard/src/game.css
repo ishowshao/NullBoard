@@ -5,3 +5,15 @@
 
 .game-score { border: 1px solid #849a54; border-radius: 8px; padding: 12px; color: #d9f780; line-height: 1.7; }
 .game-return { display: block; margin-top: 12px; min-height: 44px; width: 100%; padding: 10px; border: 1px solid #56675c; border-radius: 8px; }
+
+.task-cell.task-preview { border: 2px dashed #fff; }
+.task-cell.task-preview.task-active { border-color: #24351b; }
+.task-cell.task-preview-origin { box-shadow: 0 0 0 2px #ffcf70; }
+.game-rehearsal { margin-top: 16px; padding-top: 16px; border-top: 1px dashed #526257; }
+.game-rehearsal button { min-height: 44px; padding: 8px 12px; border: 1px solid #718273; border-radius: 8px; font-size: 13px; }
+.game-rehearsal button[aria-pressed="true"] { background: #ffcf70; color: #24351b; border-color: #ffcf70; }
+.game-rehearsal button:disabled { opacity: .4; }
+.game-rehearsal p { margin: 10px 0; font-size: 13px; line-height: 1.7; color: #bcc8bf; }
+.game-rehearsal .rehearsal-status { color: #ffcf70; }
+.rehearsal-status:empty { display: none; }
+.rehearsal-actions { display: flex; flex-wrap: wrap; gap: 8px; }
