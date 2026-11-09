@@ -45,19 +45,36 @@ export function solve(board: boolean[]): number[] | null {
   return best;
 }
 
+// In "reply all", one message reaches the entire row and column (once each).
+export function toggleCopyAll(board: boolean[], index: number): boolean[] {
+  if (!Number.isInteger(index) || index < 0 || index >= SIZE * SIZE) return board;
+  return board.map((value, i) => Math.floor(i / SIZE) === Math.floor(index / SIZE) || i % SIZE === index % SIZE ? !value : value);
+}
+
+// On an even-sized square, the row/column toggle matrix is its own inverse.
+// Applying it to the lit cells gives the unique (therefore shortest) solution.
+export function solveCopyAll(board: boolean[]): number[] | null {
+  if (board.length !== SIZE * SIZE) return null;
+  const moves = board.reduce((solution, on, i) => on ? toggleCopyAll(solution, i) : solution, Array<boolean>(SIZE * SIZE).fill(false));
+  return moves.flatMap((on, i) => on ? [i] : []);
+}
+
+export const standardRules = { toggle, solve };
+export const copyAllRules = { toggle: toggleCopyAll, solve: solveCopyAll };
+
 // Draw a fresh, reachable board with a short but nontrivial solution.
 // Bound retries so even a repeated random value cannot trap the player.
-export function overtimeBoard(previous: boolean[] | null = null, random = Math.random): boolean[] {
+export function overtimeBoard(previous: boolean[] | null = null, random = Math.random, rules = standardRules): boolean[] {
   const differs = (candidate: boolean[]) => !previous || candidate.some((value, i) => value !== previous[i]);
   for (let attempt = 0; attempt < 24; attempt += 1) {
     const available = Array.from({ length: SIZE * SIZE }, (_, i) => i);
     let candidate = Array<boolean>(SIZE * SIZE).fill(false);
     for (let move = 0; move < 4; move += 1) {
       const index = available.splice(Math.floor(random() * available.length), 1)[0];
-      candidate = toggle(candidate, index);
+      candidate = rules.toggle(candidate, index);
     }
-    if ((solve(candidate)?.length ?? 0) >= 3 && differs(candidate)) return candidate;
+    if ((rules.solve(candidate)?.length ?? 0) >= 3 && differs(candidate)) return candidate;
   }
   // These distinct, verified 3–4 move boards are also safe offline fallbacks.
-  return [initialBoard(1), initialBoard(2)].find(differs)!;
+  return [levels[1], levels[2]].map(level => level.scramble.reduce(rules.toggle, Array<boolean>(SIZE * SIZE).fill(false))).find(differs)!;
 }
