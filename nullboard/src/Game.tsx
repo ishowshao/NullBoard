@@ -11,6 +11,7 @@ export default function Game() {
   const [hint, setHint] = useState<number | null>(null);
   const [history, setHistory] = useState<boolean[][]>([]);
   const [overtime, setOvertime] = useState<boolean[] | null>(null);
+  const [challenging, setChallenging] = useState(false);
   const [copyAll, setCopyAll] = useState(false);
   const [rehearsing, setRehearsing] = useState(false);
   const [preview, setPreview] = useState<number | null>(null);
@@ -38,7 +39,7 @@ export default function Game() {
     setLevel(next); setOvertime(null); setCopyAll(false); resetBoard(initialBoard(next));
   }
   function drawOvertime(nextCopyAll: boolean) {
-    const next = overtimeBoard(overtime, Math.random, nextCopyAll ? copyAllRules : standardRules);
+    const next = overtimeBoard(overtime, Math.random, nextCopyAll ? copyAllRules : standardRules, challenging);
     setCopyAll(nextCopyAll); setOvertime(next); resetBoard(next);
   }
   if (museum) return <><div className="museum-return"><button onClick={() => setMuseum(false)}>← 返回清空待办局 · 保留本局</button></div><App /></>;
@@ -72,16 +73,17 @@ export default function Game() {
           </section>
           <aside className="game-notes">
             <div className="game-stamp" aria-hidden="true">{won ? '准予下班' : '正在假装忙碌'}</div>
-            <h2>今日工作指示</h2><p>{overtime ? (copyAll ? '回复一人，抄送全行全列。七个同事一起忙，也能一起消失。规则已改变，每份都可解，最少 3–4 步。' : '本来可以下班了。你自愿抽了一份随机待办，办公室对此深表遗憾。每份都可解，最少 3–4 步。') : levels[level].memo}</p>
+            <h2>今日工作指示</h2><p>{overtime ? (copyAll ? `回复一人，抄送全行全列。七个同事一起忙，也能一起消失。规则已改变，每份都可解，最少 ${(optimal ?? 0) >= 5 ? '5–6' : '3–4'} 步。` : `本来可以下班了。你自愿抽了一份随机待办，办公室对此深表遗憾。每份都可解，最少 ${(optimal ?? 0) >= 5 ? '5–6' : '3–4'} 步。`) : levels[level].memo}</p>
             <ul><li>亮格是待办，暗格是虚无。</li><li>{copyAll ? '空格也能点，一次翻转七格。' : '空格也能点，邻居也会变。'}</li><li>无倒计时，可无限撤销。</li></ul>
             <div ref={result} tabIndex={-1} className="game-result" role="status" aria-atomic="true">{won ? (overtime ? `${copyAll ? '全员抄送' : '临时待办'}已清空！${history.length} 次操作后，你再次获得了下班资格。` : final ? `全部 ${levels.length} 关通关！你用 ${history.length} 次操作完成最后一关。获封「首席虚无官」。` : `本关已清空！你用 ${history.length} 次操作，成功创造了零价值。`) : `还有 ${remaining} 项待办。真实产出：始终为 0。`}</div>
             {won && optimal !== undefined && <p className="game-score" role="status">{history.length === optimal ? `完美摸鱼：${optimal} 步，已达到本关最少步数！` : `本关最少 ${optimal} 步，你用了 ${history.length} 步。重开试试更快下班？`} 提示可用，撤销不计入步数。</p>}
+            {won && final && <fieldset className="game-difficulty"><legend>下一份工作量</legend><label><input type="radio" name="difficulty" checked={!challenging} onChange={() => setChallenging(false)} /> 轻松摸鱼 · 3–4 步</label><label><input type="radio" name="difficulty" checked={challenging} onChange={() => setChallenging(true)} /> 硬核加班 · 5–6 步</label><p>选择后抽题生效；不改变刚完成的棋盘。</p></fieldset>}
             {won && final && <button className="game-next" onClick={() => drawOvertime(false)}>{overtime && !copyAll ? '再抽一份临时待办' : '抽一份临时待办'} →</button>}
             {won && final && <button className="game-return" onClick={() => drawOvertime(true)}>{copyAll ? '再抽一份全员抄送' : '挑战全员抄送：整行整列翻转'} →</button>}
             {(won || overtime) && <button className={overtime ? 'game-return' : 'game-next'} onClick={() => restart(final ? 0 : level + 1)}>{final ? '重新入职' : '下一关：更多无用之事'} →</button>}
           </aside>
         </div>
-        <footer className="game-footer"><p>不保存、不上传、不产生绩效。刷新从第一关开始。</p><button onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.8 · 2026.11.09</span></footer>
+        <footer className="game-footer"><p>不保存、不上传、不产生绩效。刷新从第一关开始。</p><button onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.9 · 2026.11.10</span></footer>
       </div>
     </main>
   );

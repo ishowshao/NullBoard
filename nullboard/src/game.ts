@@ -64,17 +64,18 @@ export const copyAllRules = { toggle: toggleCopyAll, solve: solveCopyAll };
 
 // Draw a fresh, reachable board with a short but nontrivial solution.
 // Bound retries so even a repeated random value cannot trap the player.
-export function overtimeBoard(previous: boolean[] | null = null, random = Math.random, rules = standardRules): boolean[] {
+export function overtimeBoard(previous: boolean[] | null = null, random = Math.random, rules = standardRules, challenging = false): boolean[] {
   const differs = (candidate: boolean[]) => !previous || candidate.some((value, i) => value !== previous[i]);
   for (let attempt = 0; attempt < 24; attempt += 1) {
     const available = Array.from({ length: SIZE * SIZE }, (_, i) => i);
     let candidate = Array<boolean>(SIZE * SIZE).fill(false);
-    for (let move = 0; move < 4; move += 1) {
+    for (let move = 0; move < (challenging ? 6 : 4); move += 1) {
       const index = available.splice(Math.floor(random() * available.length), 1)[0];
       candidate = rules.toggle(candidate, index);
     }
-    if ((rules.solve(candidate)?.length ?? 0) >= 3 && differs(candidate)) return candidate;
+    if ((rules.solve(candidate)?.length ?? 0) >= (challenging ? 5 : 3) && differs(candidate)) return candidate;
   }
   // These distinct, verified 3–4 move boards are also safe offline fallbacks.
-  return [levels[1], levels[2]].map(level => level.scramble.reduce(rules.toggle, Array<boolean>(SIZE * SIZE).fill(false))).find(differs)!;
+  const fallbacks = challenging ? [[0, 1, 2, 3, 4, 5], [0, 3, 5, 8, 12, 15]] : [levels[1].scramble, levels[2].scramble];
+  return fallbacks.map(moves => moves.reduce(rules.toggle, Array<boolean>(SIZE * SIZE).fill(false))).find(differs)!;
 }

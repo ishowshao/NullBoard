@@ -26,7 +26,7 @@ CI=true npm run build
 
 ## Where to edit
 
-- `src/Game.tsx`, `src/game.ts`, `src/game.css`: the default five-level puzzle and optional random overtime challenges after the finale. Overtime boards are generated from legal moves, have a 3–4 move optimum, never immediately repeat, and stay unchanged on restart. No progress is persisted.
+- `src/Game.tsx`, `src/game.ts`, `src/game.css`: the default five-level puzzle and optional random overtime challenges after the finale. Overtime boards are generated from legal moves, have a selectable 3–4 or 5–6 move optimum, never immediately repeat, and stay unchanged on restart. No progress is persisted.
 - `src/CopyAll.test.tsx`: the optional reply-all variant toggles a full row and column (seven distinct cells). Exhaustively checks its unique solver across all 65,536 boards, short non-repeating draws, rule switching, hints, rehearsal, undo, restart and museum visits.
 - `src/Game.test.tsx`: puzzle logic, shortest solutions, keyboard navigation, hints, undo, restart, museum round trips, bounded random draws and overtime replay.
 - `src/Rehearsal.test.tsx`: optional rehearsal mode previews one move without changing the board or move count. Selection shows affected cells and the resulting task count; confirm applies exactly one move, while cancel, hint, undo and restart clear the preview. Covers keyboard confirmation, victory focus, museum persistence, campaign levels and overtime.
