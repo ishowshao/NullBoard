@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import App from './App';
+import GameSave from './GameSave';
+import { GameSnapshot } from './gameSave';
 import { adjacentCell, copyAllRules, initialBoard, levels, overtimeBoard, SIZE, standardRules } from './game';
 import './game.css';
 
@@ -42,6 +44,12 @@ export default function Game() {
     const next = overtimeBoard(overtime, Math.random, nextCopyAll ? copyAllRules : standardRules, challenging);
     setCopyAll(nextCopyAll); setOvertime(next); resetBoard(next);
   }
+  function restoreGame(saved: GameSnapshot) {
+    setLevel(saved.level); setBoard(saved.board); setHistory(saved.history); setOvertime(saved.overtime);
+    setCopyAll(saved.copyAll); setChallenging(saved.challenging); setRehearsing(saved.rehearsing);
+    setHint(null); setPreview(null);
+    focusResult.current = !saved.board.some(Boolean); focusBoard.current = !focusResult.current;
+  }
   if (museum) return <><div className="museum-return"><button onClick={() => setMuseum(false)}>← 返回清空待办局 · 保留本局</button></div><App /></>;
   return (
     <main className="null-game">
@@ -83,7 +91,8 @@ export default function Game() {
             {(won || overtime) && <button className={overtime ? 'game-return' : 'game-next'} onClick={() => restart(final ? 0 : level + 1)}>{final ? '重新入职' : '下一关：更多无用之事'} →</button>}
           </aside>
         </div>
-        <footer className="game-footer"><p>不保存、不上传、不产生绩效。刷新从第一关开始。</p><button onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.9 · 2026.11.10</span></footer>
+        <GameSave game={{ level, board, history, overtime, copyAll, challenging, rehearsing }} onRestore={restoreGame} />
+        <footer className="game-footer"><p>不上传、不产生绩效。刷新从第一关开始，可手动读取本机存档。</p><button onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.10 · 2026.11.11</span></footer>
       </div>
     </main>
   );

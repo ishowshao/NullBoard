@@ -26,7 +26,8 @@ CI=true npm run build
 
 ## Where to edit
 
-- `src/Game.tsx`, `src/game.ts`, `src/game.css`: the default five-level puzzle and optional random overtime challenges after the finale. Overtime boards are generated from legal moves, have a selectable 3–4 or 5–6 move optimum, never immediately repeat, and stay unchanged on restart. No progress is persisted.
+- `src/Game.tsx`, `src/game.ts`, `src/game.css`: the default five-level puzzle and optional random overtime challenges after the finale. Overtime boards are generated from legal moves, have a selectable 3–4 or 5–6 move optimum, never immediately repeat, and stay unchanged on restart. Progress is persisted only when the player explicitly saves a local checkpoint.
+- `src/GameSave.tsx`, `src/gameSave.ts`, `src/GameSave.test.tsx`: one opt-in browser-local checkpoint, explicit restore/overwrite/delete, full undo-chain validation, cross-tab metadata refresh and storage-failure recovery. Reload still starts the campaign; restoring retains the chosen rule, original overtime board, difficulty and rehearsal setting, not pending previews or hints. No automatic saving or uploads. Saves over 10,000 undo steps are rejected without disturbing an existing checkpoint.
 - `src/CopyAll.test.tsx`: the optional reply-all variant toggles a full row and column (seven distinct cells). Exhaustively checks its unique solver across all 65,536 boards, short non-repeating draws, rule switching, hints, rehearsal, undo, restart and museum visits.
 - `src/Game.test.tsx`: puzzle logic, shortest solutions, keyboard navigation, hints, undo, restart, museum round trips, bounded random draws and overtime replay.
 - `src/Rehearsal.test.tsx`: optional rehearsal mode previews one move without changing the board or move count. Selection shows affected cells and the resulting task count; confirm applies exactly one move, while cancel, hint, undo and restart clear the preview. Covers keyboard confirmation, victory focus, museum persistence, campaign levels and overtime.
@@ -40,7 +41,7 @@ CI=true npm run build
 - `src/branding.test.ts`: metadata, manifest and local icon checks.
 - `public/`: browser metadata and branded icons.
 
-Keep the joke intentional. Buttons must not create real tasks, send invitations, call an AI service, or save progress. Preserve the persistent status region, Escape dismissal and focus restoration when changing feedback. Each feature button exposes whether its joke is open with `aria-expanded` and points to the shared status region with `aria-controls`; keep that target mounted and its ID unique per app instance.
+Keep the joke intentional. Museum buttons must not create real tasks, send invitations, call an AI service, or save progress. The separate game has an explicitly labeled, opt-in local checkpoint. Preserve the persistent status region, Escape dismissal and focus restoration when changing feedback. Each feature button exposes whether its joke is open with `aria-expanded` and points to the shared status region with `aria-controls`; keep that target mounted and its ID unique per app instance.
 
 For presentation changes, check narrow screens, enlarged text, both themes, keyboard focus, repeated clicks and dismissal in a browser. Jest's DOM environment cannot validate actual geometry, touch input, or screen-reader announcements.
 
