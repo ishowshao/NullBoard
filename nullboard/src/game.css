@@ -30,3 +30,9 @@
 .save-actions button { min-height: 44px; padding: 8px 12px; border: 1px solid #718273; border-radius: 8px; font-size: 13px; }
 .game-save p[role="status"] { color: #ffcf70; }
 .game-save p:empty { display: none; }
+
+.game-daily { margin-top: 24px; padding: 18px; border: 1px solid #849a54; border-radius: 12px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.game-daily > div { flex: 1 1 300px; min-width: 0; }
+.game-daily h2 { color: #d9f780; font-size: 17px; font-weight: 700; }
+.game-daily p { color: #bcc8bf; font-size: 13px; line-height: 1.8; margin-top: 8px; }
+.game-daily button { min-height: 48px; padding: 10px 14px; border-radius: 8px; background: #d9f780; color: #24351b; font-weight: 700; }

@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import App from './App';
 import GameSave from './GameSave';
+import DailyChallenge from './DailyChallenge';
+import { dailyBoard } from './daily';
 import { GameSnapshot } from './gameSave';
 import { adjacentCell, copyAllRules, initialBoard, levels, overtimeBoard, SIZE, standardRules } from './game';
 import './game.css';
@@ -91,8 +93,13 @@ export default function Game() {
             {(won || overtime) && <button className={overtime ? 'game-return' : 'game-next'} onClick={() => restart(final ? 0 : level + 1)}>{final ? '重新入职' : '下一关：更多无用之事'} →</button>}
           </aside>
         </div>
+        <DailyChallenge onStart={date => {
+          const next = dailyBoard(date);
+          setLevel(levels.length - 1); setCopyAll(true); setChallenging(true);
+          setOvertime(next); resetBoard(next);
+        }} />
         <GameSave game={{ level, board, history, overtime, copyAll, challenging, rehearsing }} onRestore={restoreGame} />
-        <footer className="game-footer"><p>不上传、不产生绩效。刷新从第一关开始，可手动读取本机存档。</p><button onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.10 · 2026.11.11</span></footer>
+        <footer className="game-footer"><p>不上传、不产生绩效。刷新从第一关开始，可手动读取本机存档。</p><button onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.11 · 2026.11.12</span></footer>
       </div>
     </main>
   );
