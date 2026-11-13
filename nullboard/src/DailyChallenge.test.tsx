@@ -2,7 +2,7 @@ import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import Game from './Game';
 import DailyChallenge from './DailyChallenge';
-import { dailyBoard, dailyDate } from './daily';
+import { dailyBoard, dailyDate, previousDailyDates } from './daily';
 import { copyAllRules } from './game';
 const cell = (i: number) => screen.getByRole('button', { name: new RegExp(`第${Math.floor(i / 4) + 1}行第${i % 4 + 1}列`) });
 const read = () => Array.from({ length: 16 }, (_, i) => cell(i).getAttribute('aria-pressed') === 'true');
@@ -55,4 +55,40 @@ test('daily puzzle is immediately playable with rehearsal, undo, restart, saves 
   click(/再抽一份全员抄送/); expect(read()).not.toEqual(board);
   click(/领取今日/); expect(read()).toEqual(board);
   click(/重新入职/); expect(screen.getByText(/第 1 \/ 5 关/)).toBeInTheDocument();
+});
+
+test('archive dates span leap days and year boundaries without host timezone dependence', () => {
+  expect(previousDailyDates('2028-03-01')).toEqual(['2028-02-29', '2028-02-28', '2028-02-27', '2028-02-26', '2028-02-25', '2028-02-24', '2028-02-23']);
+  expect(previousDailyDates('2027-01-01')[0]).toBe('2026-12-31');
+});
+test('archive selection does not start a game, stays selected across midnight, and clamps when expired', () => {
+  jest.useFakeTimers(); jest.setSystemTime(new Date('2026-11-13T15:59:59Z'));
+  const onStart = jest.fn(); render(<DailyChallenge onStart={onStart} />);
+  const select = screen.getByRole('combobox', { name: /派单日期/ });
+  expect(select).toHaveValue('2026-11-12');
+  fireEvent.change(select, { target: { value: '2026-11-10' } });
+  expect(onStart).not.toHaveBeenCalled();
+  act(() => { jest.advanceTimersByTime(30000); });
+  expect(select).toHaveValue('2026-11-10');
+  click(/领取 2026-11-10/); expect(onStart).toHaveBeenLastCalledWith('2026-11-10');
+  jest.setSystemTime(new Date('2026-12-01T12:00:00Z'));
+  fireEvent.focus(window);
+  expect(select).toHaveValue('2026-11-30');
+  expect(onStart).toHaveBeenCalledTimes(1);
+  click(/领取 2026-11-30/); expect(onStart).toHaveBeenLastCalledWith('2026-11-30');
+});
+test('archived puzzle supports solving, restart, replay, undo, and saved progress', () => {
+  jest.useFakeTimers(); jest.setSystemTime(new Date('2026-11-13T12:00:00Z'));
+  render(<Game />); fireEvent.click(cell(0)); const current = read();
+  fireEvent.change(screen.getByRole('combobox'), { target: { value: '2026-11-08' } });
+  expect(read()).toEqual(current);
+  click(/领取 2026-11-08/); const board = dailyBoard('2026-11-08');
+  expect(read()).toEqual(board); expect(cell(0)).toHaveFocus();
+  fireEvent.click(cell(0)); click('撤销'); expect(read()).toEqual(board);
+  click('保存当前局'); click(/领取今日/); click('读取存档（替换当前局）');
+  expect(read()).toEqual(board);
+  copyAllRules.solve(board)!.forEach(i => fireEvent.click(cell(i)));
+  expect(screen.getByText(/全员抄送已清空/)).toBeInTheDocument();
+  click('重开本关'); expect(read()).toEqual(board);
+  click(/领取 2026-11-08/); expect(read()).toEqual(board);
 });

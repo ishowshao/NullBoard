@@ -36,3 +36,10 @@
 .game-daily h2 { color: #d9f780; font-size: 17px; font-weight: 700; }
 .game-daily p { color: #bcc8bf; font-size: 13px; line-height: 1.8; margin-top: 8px; }
 .game-daily button { min-height: 48px; padding: 10px 14px; border-radius: 8px; background: #d9f780; color: #24351b; font-weight: 700; }
+
+.game-daily > .daily-archive { flex-basis: 100%; border-top: 1px dashed #526257; padding-top: 16px; }
+.daily-archive h3 { font-size: 15px; font-weight: 700; }
+.daily-archive label { display: block; font-size: 13px; margin: 12px 0 6px; }
+.daily-archive select { display: block; max-width: 100%; min-height: 44px; padding: 8px 12px; margin-bottom: 12px; background: #1a2722; color: #e8efe8; border: 1px solid #718273; border-radius: 8px; }
+.daily-archive select:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
+.daily-archive button { max-width: 100%; white-space: normal; }

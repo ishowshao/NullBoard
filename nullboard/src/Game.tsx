@@ -99,7 +99,7 @@ export default function Game() {
           setOvertime(next); resetBoard(next);
         }} />
         <GameSave game={{ level, board, history, overtime, copyAll, challenging, rehearsing }} onRestore={restoreGame} />
-        <footer className="game-footer"><p>不上传、不产生绩效。刷新从第一关开始，可手动读取本机存档。</p><button onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.11 · 2026.11.12</span></footer>
+        <footer className="game-footer"><p>不上传、不产生绩效。刷新从第一关开始，可手动读取本机存档。</p><button onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.12 · 2026.11.13</span></footer>
       </div>
     </main>
   );

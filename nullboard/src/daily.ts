@@ -16,3 +16,10 @@ export function dailyBoard(date: string): boolean[] {
     return seed / 0x100000000;
   }, copyAllRules, true);
 }
+
+// Previous seven UTC+8 calendar dates. Date-only UTC arithmetic avoids host DST.
+export function previousDailyDates(today = dailyDate()): string[] {
+  const midnight = Date.parse(`${today}T00:00:00Z`);
+  return Array.from({ length: 7 }, (_, i) =>
+    new Date(midnight - (i + 1) * 86400000).toISOString().slice(0, 10));
+}

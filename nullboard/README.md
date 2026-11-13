@@ -26,7 +26,7 @@ CI=true npm run build
 
 ## Where to edit
 
-- `src/daily.ts`, `src/DailyChallenge.tsx`, `src/DailyChallenge.test.tsx`: a deterministic UTC+8 daily hard reply-all puzzle, directly accessible from the campaign. Refreshes its date label without interrupting play; starting uses the current date. Shares existing hints, rehearsal, undo and opt-in checkpoint mechanics.
+- `src/daily.ts`, `src/DailyChallenge.tsx`, `src/DailyChallenge.test.tsx`: a deterministic UTC+8 daily hard reply-all puzzle, directly accessible from the campaign. Refreshes its date label without interrupting play; starting uses the current date. Includes a seven-day archive selector: selection and midnight refresh do not replace an active board; explicit claim starts the displayed date. Shares existing hints, rehearsal, undo and opt-in checkpoint mechanics.
 
 - `src/Game.tsx`, `src/game.ts`, `src/game.css`: the default five-level puzzle and optional random overtime challenges after the finale. Overtime boards are generated from legal moves, have a selectable 3–4 or 5–6 move optimum, never immediately repeat, and stay unchanged on restart. Progress is persisted only when the player explicitly saves a local checkpoint.
 - `src/GameSave.tsx`, `src/gameSave.ts`, `src/GameSave.test.tsx`: one opt-in browser-local checkpoint, explicit restore/overwrite/delete, full undo-chain validation, cross-tab metadata refresh and storage-failure recovery. Reload still starts the campaign; restoring retains the chosen rule, original overtime board, difficulty and rehearsal setting, not pending previews or hints. No automatic saving or uploads. Saves over 10,000 undo steps are rejected without disturbing an existing checkpoint.
