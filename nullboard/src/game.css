@@ -43,3 +43,8 @@
 .daily-archive select { display: block; max-width: 100%; min-height: 44px; padding: 8px 12px; margin-bottom: 12px; background: #1a2722; color: #e8efe8; border: 1px solid #718273; border-radius: 8px; }
 .daily-archive select:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
 .daily-archive button { max-width: 100%; white-space: normal; }
+
+.archive-navigation { display: flex; gap: 8px; flex-wrap: wrap; }
+.archive-navigation button { flex: 1 1 96px; }
+.archive-navigation button:disabled { opacity: .45; cursor: not-allowed; }
+.game-daily .archive-selection { margin: 10px 0; }

@@ -92,3 +92,31 @@ test('archived puzzle supports solving, restart, replay, undo, and saved progres
   click('重开本关'); expect(read()).toEqual(board);
   click(/领取 2026-11-08/); expect(read()).toEqual(board);
 });
+
+test('archive day buttons step, stop at both bounds, and never replace the current board', () => {
+  jest.useFakeTimers(); jest.setSystemTime(new Date('2026-11-14T12:00:00Z'));
+  render(<Game />); fireEvent.click(cell(0)); const before = read();
+  const select = screen.getByRole('combobox', { name: /派单日期/ });
+  expect(screen.getByRole('button', { name: '后一天 →' })).toBeDisabled();
+  for (let i = 0; i < 6; i++) click('← 前一天');
+  expect(select).toHaveValue('2026-11-07');
+  expect(screen.getByRole('button', { name: '← 前一天' })).toBeDisabled();
+  click('← 前一天'); expect(select).toHaveValue('2026-11-07');
+  expect(read()).toEqual(before);
+  click('后一天 →'); expect(select).toHaveValue('2026-11-08');
+  expect(screen.getByText(/待领取：/)).toHaveTextContent('2026-11-08');
+  click(/领取 2026-11-08/); expect(read()).toEqual(dailyBoard('2026-11-08'));
+  fireEvent.change(select, { target: { value: '2026-11-13' } });
+  expect(screen.getByRole('button', { name: '后一天 →' })).toBeDisabled();
+});
+test('archive navigation recalculates boundaries after midnight without starting a game', () => {
+  jest.useFakeTimers(); jest.setSystemTime(new Date('2026-11-14T15:59:59Z'));
+  const onStart = jest.fn(); render(<DailyChallenge onStart={onStart} />);
+  click('← 前一天');
+  act(() => { jest.advanceTimersByTime(30000); });
+  click('后一天 →'); click('后一天 →');
+  expect(screen.getByRole('combobox')).toHaveValue('2026-11-14');
+  expect(screen.getByRole('button', { name: '后一天 →' })).toBeDisabled();
+  expect(onStart).not.toHaveBeenCalled();
+  click(/领取 2026-11-14/); expect(onStart).toHaveBeenCalledWith('2026-11-14');
+});
