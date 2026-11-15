@@ -46,5 +46,5 @@
 
 .archive-navigation { display: flex; gap: 8px; flex-wrap: wrap; }
 .archive-navigation button { flex: 1 1 96px; }
-.archive-navigation button:disabled { opacity: .45; cursor: not-allowed; }
+.archive-navigation button[aria-disabled="true"] { opacity: .45; cursor: not-allowed; }
 .game-daily .archive-selection { margin: 10px 0; }

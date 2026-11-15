@@ -28,10 +28,14 @@ export default function DailyChallenge({ onStart }: { onStart: (date: string) =>
         {dates.map(day => <option key={day} value={day}>{day}</option>)}
       </select>
       <div className="archive-navigation" role="group" aria-label="逐日翻阅补班档案">
-        <button disabled={archiveIndex === dates.length - 1} onClick={() => setSelected(dates[archiveIndex + 1])}>← 前一天</button>
-        <button disabled={archiveIndex === 0} onClick={() => setSelected(dates[archiveIndex - 1])}>后一天 →</button>
+        <button aria-disabled={archiveIndex === dates.length - 1} aria-describedby="archive-selection" onClick={() => {
+          if (archiveIndex < dates.length - 1) setSelected(dates[archiveIndex + 1]);
+        }}>← 前一天</button>
+        <button aria-disabled={archiveIndex === 0} aria-describedby="archive-selection" onClick={() => {
+          if (archiveIndex > 0) setSelected(dates[archiveIndex - 1]);
+        }}>后一天 →</button>
       </div>
-      <p role="status" className="archive-selection">待领取：{archiveDate} · 仅翻阅，不换当前局</p>
+      <p id="archive-selection" role="status" className="archive-selection">待领取：{archiveDate} · 仅翻阅，不换当前局{archiveIndex === 0 ? ' · 已到最新档案' : archiveIndex === dates.length - 1 ? ' · 已到最早档案' : ''}</p>
       <button aria-describedby="daily-warning" onClick={() => {
         // Even after a sleeping tab wakes, launch only the date visible to the player.
         onStart(archiveDate);

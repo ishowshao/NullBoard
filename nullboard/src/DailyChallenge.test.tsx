@@ -1,4 +1,5 @@
 import React from 'react';
+import userEvent from '@testing-library/user-event';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import Game from './Game';
 import DailyChallenge from './DailyChallenge';
@@ -97,17 +98,17 @@ test('archive day buttons step, stop at both bounds, and never replace the curre
   jest.useFakeTimers(); jest.setSystemTime(new Date('2026-11-14T12:00:00Z'));
   render(<Game />); fireEvent.click(cell(0)); const before = read();
   const select = screen.getByRole('combobox', { name: /派单日期/ });
-  expect(screen.getByRole('button', { name: '后一天 →' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: '后一天 →' })).toHaveAttribute('aria-disabled', 'true');
   for (let i = 0; i < 6; i++) click('← 前一天');
   expect(select).toHaveValue('2026-11-07');
-  expect(screen.getByRole('button', { name: '← 前一天' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: '← 前一天' })).toHaveAttribute('aria-disabled', 'true');
   click('← 前一天'); expect(select).toHaveValue('2026-11-07');
   expect(read()).toEqual(before);
   click('后一天 →'); expect(select).toHaveValue('2026-11-08');
   expect(screen.getByText(/待领取：/)).toHaveTextContent('2026-11-08');
   click(/领取 2026-11-08/); expect(read()).toEqual(dailyBoard('2026-11-08'));
   fireEvent.change(select, { target: { value: '2026-11-13' } });
-  expect(screen.getByRole('button', { name: '后一天 →' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: '后一天 →' })).toHaveAttribute('aria-disabled', 'true');
 });
 test('archive navigation recalculates boundaries after midnight without starting a game', () => {
   jest.useFakeTimers(); jest.setSystemTime(new Date('2026-11-14T15:59:59Z'));
@@ -116,7 +117,32 @@ test('archive navigation recalculates boundaries after midnight without starting
   act(() => { jest.advanceTimersByTime(30000); });
   click('后一天 →'); click('后一天 →');
   expect(screen.getByRole('combobox')).toHaveValue('2026-11-14');
-  expect(screen.getByRole('button', { name: '后一天 →' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: '后一天 →' })).toHaveAttribute('aria-disabled', 'true');
   expect(onStart).not.toHaveBeenCalled();
   click(/领取 2026-11-14/); expect(onStart).toHaveBeenCalledWith('2026-11-14');
+});
+
+
+test('keyboard archive limits retain focus, ignore repeated activation, and allow reversal', () => {
+  jest.useFakeTimers(); jest.setSystemTime(new Date('2026-11-15T12:00:00Z'));
+  const onStart = jest.fn(); render(<DailyChallenge onStart={onStart} />);
+  const previous = screen.getByRole('button', { name: '← 前一天' });
+  const next = screen.getByRole('button', { name: '后一天 →' });
+  previous.focus();
+  for (let i = 0; i < 8; i++) userEvent.keyboard('{Enter}');
+  expect(previous).toHaveFocus();
+  expect(previous).toHaveAttribute('aria-disabled', 'true');
+  expect(screen.getByRole('combobox')).toHaveValue('2026-11-08');
+  expect(screen.getByRole('status')).toHaveTextContent('已到最早档案');
+  userEvent.tab(); expect(next).toHaveFocus();
+  for (let i = 0; i < 8; i++) userEvent.keyboard(' ');
+  expect(next).toHaveFocus();
+  expect(next).toHaveAttribute('aria-disabled', 'true');
+  expect(screen.getByRole('combobox')).toHaveValue('2026-11-14');
+  expect(screen.getByRole('status')).toHaveTextContent('已到最新档案');
+  userEvent.tab({ shift: true }); expect(previous).toHaveFocus();
+  userEvent.keyboard('{Enter}');
+  expect(screen.getByRole('combobox')).toHaveValue('2026-11-13');
+  expect(screen.getByRole('status')).not.toHaveTextContent('已到');
+  expect(onStart).not.toHaveBeenCalled();
 });
