@@ -1,0 +1,45 @@
+import React from 'react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import Game from './Game';
+import { initialBoard, solve } from './game';
+const cell = (i: number) => screen.getByRole('button', { name: new RegExp(`第${Math.floor(i / 4) + 1}行第${i % 4 + 1}列`) });
+const read = () => Array.from({ length: 16 }, (_, i) => cell(i).getAttribute('aria-pressed') === 'true');
+const click = (name: string | RegExp) => fireEvent.click(screen.getByRole('button', { name }));
+afterEach(() => window.localStorage.clear());
+test('redo replays multiple undone moves and a new move discards the old branch', () => {
+  render(<Game />);
+  expect(screen.getByRole('button', { name: '重做' })).toBeDisabled();
+  fireEvent.click(cell(0)); const first = read();
+  fireEvent.click(cell(1)); const second = read();
+  click('撤销'); click('撤销'); expect(read()).toEqual(initialBoard(0));
+  click('重做'); expect(read()).toEqual(first);
+  click('重做'); expect(read()).toEqual(second);
+  expect(screen.getByRole('button', { name: '重做' })).toBeDisabled();
+  click('撤销'); fireEvent.click(cell(2));
+  expect(screen.getByRole('button', { name: '重做' })).toBeDisabled();
+});
+test('redo can restore a victory and focus its result; restart clears the future', () => {
+  render(<Game />);
+  solve(initialBoard(0))!.forEach(i => fireEvent.click(cell(i)));
+  click('撤销'); click('求助同事'); click('重做');
+  expect(cell(0)).toBeDisabled();
+  expect(screen.getByText(/本关已清空！/)).toHaveFocus();
+  expect(screen.queryByRole('button', { name: /建议点击/ })).not.toBeInTheDocument();
+  click('撤销'); click('重开本关');
+  expect(screen.getByRole('button', { name: '重做' })).toBeDisabled();
+});
+test('preview and museum preserve redo, but confirmed moves and loading clear it', () => {
+  render(<Game />);
+  fireEvent.click(cell(0)); const first = read();
+  fireEvent.click(cell(1)); click('撤销');
+  click('演练模式'); fireEvent.click(cell(3)); click('取消演练');
+  click(/参观旧版/); click(/返回清空/);
+  expect(screen.getByRole('button', { name: '重做' })).toBeEnabled();
+  click('重做'); click('撤销'); expect(read()).toEqual(first);
+  fireEvent.click(cell(4)); click('执行这一步');
+  expect(screen.getByRole('button', { name: '重做' })).toBeDisabled();
+  click('保存当前局'); click('撤销'); click('读取存档（替换当前局）');
+  expect(screen.getByRole('button', { name: '重做' })).toBeDisabled();
+  click('撤销'); click(/领取今日/);
+  expect(screen.getByRole('button', { name: '重做' })).toBeDisabled();
+});

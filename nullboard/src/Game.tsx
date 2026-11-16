@@ -14,6 +14,7 @@ export default function Game() {
   const [board, setBoard] = useState(() => initialBoard(0));
   const [hint, setHint] = useState<number | null>(null);
   const [history, setHistory] = useState<boolean[][]>([]);
+  const [future, setFuture] = useState<boolean[][]>([]);
   const [overtime, setOvertime] = useState<boolean[] | null>(null);
   const [challenging, setChallenging] = useState(false);
   const [copyAll, setCopyAll] = useState(false);
@@ -34,10 +35,10 @@ export default function Game() {
     if (focusResult.current) { result.current?.focus(); focusResult.current = false; }
   }, [board]);
   function resetBoard(nextBoard: boolean[]) {
-    setBoard(nextBoard); setHistory([]); setHint(null); setPreview(null); focusBoard.current = true;
+    setBoard(nextBoard); setHistory([]); setFuture([]); setHint(null); setPreview(null); focusBoard.current = true;
   }
   function play(index: number) {
-    setHistory([...history, board]); setBoard(rules.toggle(board, index)); setHint(null); setPreview(null);
+    setFuture([]); setHistory([...history, board]); setBoard(rules.toggle(board, index)); setHint(null); setPreview(null);
   }
   function restart(next = level) {
     setLevel(next); setOvertime(null); setCopyAll(false); resetBoard(initialBoard(next));
@@ -47,7 +48,7 @@ export default function Game() {
     setCopyAll(nextCopyAll); setOvertime(next); resetBoard(next);
   }
   function restoreGame(saved: GameSnapshot) {
-    setLevel(saved.level); setBoard(saved.board); setHistory(saved.history); setOvertime(saved.overtime);
+    setFuture([]); setLevel(saved.level); setBoard(saved.board); setHistory(saved.history); setOvertime(saved.overtime);
     setCopyAll(saved.copyAll); setChallenging(saved.challenging); setRehearsing(saved.rehearsing);
     setHint(null); setPreview(null);
     focusResult.current = !saved.board.some(Boolean); focusBoard.current = !focusResult.current;
@@ -72,7 +73,7 @@ export default function Game() {
                 return <button key={index} ref={el => { cells.current[index] = el; }} onKeyDown={event => { if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) { event.preventDefault(); cells.current[adjacentCell(index, event.key)]?.focus(); } }} className={`task-cell ${active ? 'task-active' : ''} ${hint === index ? 'task-hint' : ''} ${changes ? 'task-preview' : ''} ${preview === index ? 'task-preview-origin' : ''}`} aria-label={`第${Math.floor(index / SIZE) + 1}行第${index % SIZE + 1}列：${active ? '待办' : '空'}${hint === index ? '，建议点击' : ''}${changes ? `，演练后：${active ? '空' : '待办'}` : ''}${preview === index ? '，演练起点' : ''}`} aria-pressed={active} disabled={won} onClick={() => { if (rehearsing) { setPreview(index); setHint(null); } else play(index); }}><span aria-hidden="true">{preview === index ? '◎' : active ? '▣' : '·'}</span><small>{changes ? (active ? '待办→空' : '空→待办') : active ? '待办' : '空'}</small></button>;
               })}
             </div>
-            <div className="game-controls"><span>已操作 <strong>{history.length}</strong> 次</span><button disabled={!history.length} onClick={() => { setBoard(history[history.length - 1]); setHistory(history.slice(0, -1)); setHint(null); setPreview(null); }}>撤销</button><button disabled={won} onClick={() => { setHint(rules.solve(board)?.[0] ?? null); setPreview(null); }}>求助同事</button><button onClick={() => resetBoard((overtime ?? initialBoard(level)).slice())}>重开本关</button></div>
+            <div className="game-controls"><span>已操作 <strong>{history.length}</strong> 次</span><button disabled={!history.length} onClick={() => { setFuture([...future, board]); setBoard(history[history.length - 1]); setHistory(history.slice(0, -1)); setHint(null); setPreview(null); }}>撤销</button><button disabled={!future.length} onClick={() => { const next = future[future.length - 1]; setHistory([...history, board]); setBoard(next); setFuture(future.slice(0, -1)); setHint(null); setPreview(null); focusResult.current = !next.some(Boolean); }}>重做</button><button disabled={won} onClick={() => { setHint(rules.solve(board)?.[0] ?? null); setPreview(null); }}>求助同事</button><button onClick={() => resetBoard((overtime ?? initialBoard(level)).slice())}>重开本关</button></div>
             <p className="hint-message" role="status">{hint !== null ? `同事建议：点击第 ${Math.floor(hint / SIZE) + 1} 行第 ${hint % SIZE + 1} 列。` : '卡住了？可以请同事指点一步。'}</p>
             <div className="game-rehearsal">
               <button aria-pressed={rehearsing} disabled={won} onClick={() => { setRehearsing(!rehearsing); setPreview(null); setHint(null); }}>演练模式</button>
@@ -99,7 +100,7 @@ export default function Game() {
           setOvertime(next); resetBoard(next);
         }} />
         <GameSave game={{ level, board, history, overtime, copyAll, challenging, rehearsing }} onRestore={restoreGame} />
-        <footer className="game-footer"><p>不上传、不产生绩效。刷新从第一关开始，可手动读取本机存档。</p><button onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.14 · 2026.11.15</span></footer>
+        <footer className="game-footer"><p>不上传、不产生绩效。刷新从第一关开始，可手动读取本机存档。</p><button onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.15 · 2026.11.16</span></footer>
       </div>
     </main>
   );
