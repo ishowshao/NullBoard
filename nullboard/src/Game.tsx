@@ -18,6 +18,7 @@ export default function Game() {
   const [overtime, setOvertime] = useState<boolean[] | null>(null);
   const [challenging, setChallenging] = useState(false);
   const [copyAll, setCopyAll] = useState(false);
+  const [claimedDate, setClaimedDate] = useState<string>();
   const [rehearsing, setRehearsing] = useState(false);
   const [preview, setPreview] = useState<number | null>(null);
   const focusBoard = useRef(false);
@@ -41,13 +42,16 @@ export default function Game() {
     setFuture([]); setHistory([...history, board]); setBoard(rules.toggle(board, index)); setHint(null); setPreview(null);
   }
   function restart(next = level) {
+    setClaimedDate(undefined);
     setLevel(next); setOvertime(null); setCopyAll(false); resetBoard(initialBoard(next));
   }
   function drawOvertime(nextCopyAll: boolean) {
     const next = overtimeBoard(overtime, Math.random, nextCopyAll ? copyAllRules : standardRules, challenging);
+    setClaimedDate(undefined);
     setCopyAll(nextCopyAll); setOvertime(next); resetBoard(next);
   }
   function restoreGame(saved: GameSnapshot) {
+    setClaimedDate(saved.claimedDate);
     setFuture([]); setLevel(saved.level); setBoard(saved.board); setHistory(saved.history); setOvertime(saved.overtime);
     setCopyAll(saved.copyAll); setChallenging(saved.challenging); setRehearsing(saved.rehearsing);
     setHint(null); setPreview(null);
@@ -66,6 +70,7 @@ export default function Game() {
         <div className="game-layout">
           <section className="game-board-panel" aria-label="待办棋盘">
             <div className="game-board-top"><span>{overtime ? (copyAll ? '番外 · 全员抄送' : '番外 · 临时加班') : `第 ${level + 1} / ${levels.length} 关 · ${levels[level].name}`}</span><span>剩余 <strong>{remaining}</strong></span></div>
+            {claimedDate && <p className="game-rule">本局派单日期：{claimedDate}（UTC+8）</p>}
             <p id="board-help" className="game-rule">{rehearsing ? `演练中：点击格子预览${influence}的翻转，选好后按「执行这一步」。方向键移动，空格或回车选择演练位置。` : `点击任意格子，翻转${influence}。让所有格子变成「空」，即可下班。键盘方向键移动，空格或回车翻转。`}</p>
             <div className="task-grid" aria-describedby="board-help rehearsal-help">
               {board.map((active, index) => {
@@ -88,6 +93,12 @@ export default function Game() {
             <ul><li>亮格是待办，暗格是虚无。</li><li>{copyAll ? '空格也能点，一次翻转七格。' : '空格也能点，邻居也会变。'}</li><li>无倒计时，可无限撤销。</li></ul>
             <div ref={result} tabIndex={-1} className="game-result" role="status" aria-atomic="true">{won ? (overtime ? `${copyAll ? '全员抄送' : '临时待办'}已清空！${history.length} 次操作后，你再次获得了下班资格。` : final ? `全部 ${levels.length} 关通关！你用 ${history.length} 次操作完成最后一关。获封「首席虚无官」。` : `本关已清空！你用 ${history.length} 次操作，成功创造了零价值。`) : `还有 ${remaining} 项待办。真实产出：始终为 0。`}</div>
             {won && optimal !== undefined && <p className="game-score" role="status">{history.length === optimal ? `完美摸鱼：${optimal} 步，已达到本关最少步数！` : `本关最少 ${optimal} 步，你用了 ${history.length} 步。重开试试更快下班？`} 提示可用，撤销不计入步数。</p>}
+            {won && claimedDate && optimal !== undefined && <details className="game-receipt">
+              <summary>分享下班回执</summary>
+              <label htmlFor="game-receipt">点按或 Tab 选中文字，再手动复制；不会自动发布。</label>
+              <textarea id="game-receipt" aria-label="下班回执文案" readOnly rows={4} onFocus={event => event.currentTarget.select()}
+                value={`NullBoard · 下班回执\n${claimedDate} 全员抄送（UTC+8）｜${history.length} 步下班，最少 ${optimal} 步\nhttps://ishowshao.github.io/NullBoard/`} />
+            </details>}
             {won && final && <fieldset className="game-difficulty"><legend>下一份工作量</legend><label><input type="radio" name="difficulty" checked={!challenging} onChange={() => setChallenging(false)} /> 轻松摸鱼 · 3–4 步</label><label><input type="radio" name="difficulty" checked={challenging} onChange={() => setChallenging(true)} /> 硬核加班 · 5–6 步</label><p>选择后抽题生效；不改变刚完成的棋盘。</p></fieldset>}
             {won && final && <button className="game-next" onClick={() => drawOvertime(false)}>{overtime && !copyAll ? '再抽一份临时待办' : '抽一份临时待办'} →</button>}
             {won && final && <button className="game-return" onClick={() => drawOvertime(true)}>{copyAll ? '再抽一份全员抄送' : '挑战全员抄送：整行整列翻转'} →</button>}
@@ -96,11 +107,12 @@ export default function Game() {
         </div>
         <DailyChallenge onStart={date => {
           const next = dailyBoard(date);
+          setClaimedDate(date);
           setLevel(levels.length - 1); setCopyAll(true); setChallenging(true);
           setOvertime(next); resetBoard(next);
         }} />
-        <GameSave game={{ level, board, history, overtime, copyAll, challenging, rehearsing }} onRestore={restoreGame} />
-        <footer className="game-footer"><p>不上传、不产生绩效。刷新从第一关开始，可手动读取本机存档。</p><button onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.15 · 2026.11.16</span></footer>
+        <GameSave game={{ level, board, history, overtime, copyAll, challenging, rehearsing, claimedDate }} onRestore={restoreGame} />
+        <footer className="game-footer"><p>不上传、不产生绩效。刷新从第一关开始，可手动读取本机存档。</p><button onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.16 · 2026.11.17</span></footer>
       </div>
     </main>
   );

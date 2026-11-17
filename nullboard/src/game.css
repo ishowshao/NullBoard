@@ -48,3 +48,8 @@
 .archive-navigation button { flex: 1 1 96px; }
 .archive-navigation button[aria-disabled="true"] { opacity: .45; cursor: not-allowed; }
 .game-daily .archive-selection { margin: 10px 0; }
+
+.game-receipt { margin: 1rem 0; }
+.game-receipt summary { cursor: pointer; padding: .75rem 0; min-height: 44px; }
+.game-receipt label { display: block; font-size: .9rem; margin: .25rem 0; }
+.game-receipt textarea { box-sizing: border-box; width: 100%; min-width: 0; padding: .5rem; font: inherit; color: #202124; background: #fff; border: 1px solid #777; border-radius: .3rem; }

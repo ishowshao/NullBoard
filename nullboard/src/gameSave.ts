@@ -1,5 +1,7 @@
 import { copyAllRules, initialBoard, levels, SIZE, standardRules } from './game';
 
+import { dailyBoard } from './daily';
+
 export const SAVE_KEY = 'nullboard.game-save.v1';
 export type GameSnapshot = {
   level: number;
@@ -9,6 +11,7 @@ export type GameSnapshot = {
   copyAll: boolean;
   challenging: boolean;
   rehearsing: boolean;
+  claimedDate?: string;
 };
 const isBoard = (value: unknown): value is boolean[] => Array.isArray(value) && value.length === SIZE * SIZE && value.every(cell => typeof cell === 'boolean');
 const equal = (a: boolean[], b: boolean[]) => a.every((cell, i) => cell === b[i]);
@@ -24,6 +27,13 @@ export function readSave(raw: string | null): GameSnapshot | null {
       typeof value.copyAll !== 'boolean' || typeof value.challenging !== 'boolean' || typeof value.rehearsing !== 'boolean') return null;
     const snapshot: GameSnapshot = value;
     if ((snapshot.overtime && snapshot.level !== levels.length - 1) || (snapshot.copyAll && !snapshot.overtime)) return null;
+    const claimedDate = value.claimedDate;
+    if (claimedDate !== undefined) {
+      if (!snapshot.copyAll || !snapshot.overtime || typeof claimedDate !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(claimedDate)) return null;
+      const utc = new Date(`${claimedDate}T00:00:00Z`);
+      if (!Number.isFinite(utc.getTime()) || utc.toISOString().slice(0, 10) !== claimedDate ||
+        !equal(snapshot.overtime, dailyBoard(claimedDate))) return null;
+    }
     const rules = snapshot.copyAll ? copyAllRules : standardRules;
     const start = snapshot.overtime ?? initialBoard(snapshot.level);
     if (!start.some(Boolean) || rules.solve(start) === null) return null;
@@ -35,7 +45,8 @@ export function readSave(raw: string | null): GameSnapshot | null {
       if (!previous.some(Boolean) || !previous.some((_, i) => equal(rules.toggle(previous, i), next))) return null;
     }
     return { level: snapshot.level, board: snapshot.board, history: snapshot.history, overtime: snapshot.overtime,
-      copyAll: snapshot.copyAll, challenging: snapshot.challenging, rehearsing: snapshot.rehearsing };
+      copyAll: snapshot.copyAll, challenging: snapshot.challenging, rehearsing: snapshot.rehearsing,
+      ...(claimedDate === undefined ? {} : { claimedDate }) };
   } catch { return null; }
 }
 
