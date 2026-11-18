@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import App from './App';
 import GameSave from './GameSave';
 import DailyChallenge from './DailyChallenge';
-import { dailyBoard } from './daily';
+import { dailyBoard, dailyChallengeUrl, sharedDailyDate } from './daily';
 import { GameSnapshot } from './gameSave';
 import { adjacentCell, copyAllRules, initialBoard, levels, overtimeBoard, SIZE, standardRules } from './game';
 import './game.css';
@@ -19,6 +19,7 @@ export default function Game() {
   const [challenging, setChallenging] = useState(false);
   const [copyAll, setCopyAll] = useState(false);
   const [claimedDate, setClaimedDate] = useState<string>();
+  const [sharedDate, setSharedDate] = useState(() => sharedDailyDate(window.location.search));
   const [rehearsing, setRehearsing] = useState(false);
   const [preview, setPreview] = useState<number | null>(null);
   const focusBoard = useRef(false);
@@ -37,6 +38,12 @@ export default function Game() {
   }, [board]);
   function resetBoard(nextBoard: boolean[]) {
     setBoard(nextBoard); setHistory([]); setFuture([]); setHint(null); setPreview(null); focusBoard.current = true;
+  }
+  function startDaily(date: string) {
+    const next = dailyBoard(date);
+    setClaimedDate(date);
+    setLevel(levels.length - 1); setCopyAll(true); setChallenging(true);
+    setOvertime(next); resetBoard(next);
   }
   function play(index: number) {
     setFuture([]); setHistory([...history, board]); setBoard(rules.toggle(board, index)); setHint(null); setPreview(null);
@@ -67,6 +74,13 @@ export default function Game() {
           <h1 id="game-title">清空<span>待办局</span><i aria-hidden="true">∅</i></h1>
           <p className="game-subtitle">努力工作，直到所有工作都不存在。</p>
         </section>
+        {sharedDate && <section className="game-daily" aria-labelledby="shared-daily-title">
+          <div><h2 id="shared-daily-title">同题挑战 · {sharedDate}</h2>
+            <p id="shared-daily-warning">你收到了一份「全员抄送」。领取才会替换当前棋盘，不影响本机存档。</p></div>
+          <button aria-describedby="shared-daily-warning" onClick={() => {
+            startDaily(sharedDate); setSharedDate(undefined);
+          }}>领取同一份待办 →</button>
+        </section>}
         <div className="game-layout">
           <section className="game-board-panel" aria-label="待办棋盘">
             <div className="game-board-top"><span>{overtime ? (copyAll ? '番外 · 全员抄送' : '番外 · 临时加班') : `第 ${level + 1} / ${levels.length} 关 · ${levels[level].name}`}</span><span>剩余 <strong>{remaining}</strong></span></div>
@@ -97,7 +111,7 @@ export default function Game() {
               <summary>分享下班回执</summary>
               <label htmlFor="game-receipt">点按或 Tab 选中文字，再手动复制；不会自动发布。</label>
               <textarea id="game-receipt" aria-label="下班回执文案" readOnly rows={4} onFocus={event => event.currentTarget.select()}
-                value={`NullBoard · 下班回执\n${claimedDate} 全员抄送（UTC+8）｜${history.length} 步下班，最少 ${optimal} 步\nhttps://ishowshao.github.io/NullBoard/`} />
+                value={`NullBoard · 下班回执\n${claimedDate} 全员抄送（UTC+8）｜${history.length} 步下班，最少 ${optimal} 步\n${dailyChallengeUrl(claimedDate)}`} />
             </details>}
             {won && final && <fieldset className="game-difficulty"><legend>下一份工作量</legend><label><input type="radio" name="difficulty" checked={!challenging} onChange={() => setChallenging(false)} /> 轻松摸鱼 · 3–4 步</label><label><input type="radio" name="difficulty" checked={challenging} onChange={() => setChallenging(true)} /> 硬核加班 · 5–6 步</label><p>选择后抽题生效；不改变刚完成的棋盘。</p></fieldset>}
             {won && final && <button className="game-next" onClick={() => drawOvertime(false)}>{overtime && !copyAll ? '再抽一份临时待办' : '抽一份临时待办'} →</button>}
@@ -105,14 +119,9 @@ export default function Game() {
             {(won || overtime) && <button className={overtime ? 'game-return' : 'game-next'} onClick={() => restart(final ? 0 : level + 1)}>{final ? '重新入职' : '下一关：更多无用之事'} →</button>}
           </aside>
         </div>
-        <DailyChallenge onStart={date => {
-          const next = dailyBoard(date);
-          setClaimedDate(date);
-          setLevel(levels.length - 1); setCopyAll(true); setChallenging(true);
-          setOvertime(next); resetBoard(next);
-        }} />
+        <DailyChallenge onStart={startDaily} />
         <GameSave game={{ level, board, history, overtime, copyAll, challenging, rehearsing, claimedDate }} onRestore={restoreGame} />
-        <footer className="game-footer"><p>不上传、不产生绩效。刷新从第一关开始，可手动读取本机存档。</p><button onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.16 · 2026.11.17</span></footer>
+        <footer className="game-footer"><p>不上传、不产生绩效。刷新从第一关开始，可手动读取本机存档。</p><button onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.17 · 2026.11.18</span></footer>
       </div>
     </main>
   );
