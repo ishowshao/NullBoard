@@ -19,6 +19,7 @@ export default function Game() {
   const [challenging, setChallenging] = useState(false);
   const [copyAll, setCopyAll] = useState(false);
   const [claimedDate, setClaimedDate] = useState<string>();
+  const [dailyBests, setDailyBests] = useState<Record<string, number>>({});
   const [sharedDate, setSharedDate] = useState(() => sharedDailyDate(window.location.search));
   const [rehearsing, setRehearsing] = useState(false);
   const [preview, setPreview] = useState<number | null>(null);
@@ -32,10 +33,17 @@ export default function Game() {
   const influence = copyAll ? '整行和整列（交点只翻一次）' : '它和上下左右的格子';
   const optimal = rules.solve(overtime ?? initialBoard(level))?.length;
   const previewBoard = preview === null ? null : rules.toggle(board, preview);
+  const dailyBest = claimedDate ? dailyBests[claimedDate] : undefined;
   useEffect(() => {
     if (focusBoard.current) { cells.current[0]?.focus(); focusBoard.current = false; }
     if (focusResult.current) { result.current?.focus(); focusResult.current = false; }
   }, [board]);
+  useEffect(() => {
+    if (!claimedDate || !won) return;
+    const moves = history.length;
+    setDailyBests(previous => previous[claimedDate] !== undefined && previous[claimedDate] <= moves
+      ? previous : { ...previous, [claimedDate]: moves });
+  }, [claimedDate, history.length, won]);
   function resetBoard(nextBoard: boolean[]) {
     setBoard(nextBoard); setHistory([]); setFuture([]); setHint(null); setPreview(null); focusBoard.current = true;
   }
@@ -107,6 +115,7 @@ export default function Game() {
             <ul><li>亮格是待办，暗格是虚无。</li><li>{copyAll ? '空格也能点，一次翻转七格。' : '空格也能点，邻居也会变。'}</li><li>无倒计时，可无限撤销。</li></ul>
             <div ref={result} tabIndex={-1} className="game-result" role="status" aria-atomic="true">{won ? (overtime ? `${copyAll ? '全员抄送' : '临时待办'}已清空！${history.length} 次操作后，你再次获得了下班资格。` : final ? `全部 ${levels.length} 关通关！你用 ${history.length} 次操作完成最后一关。获封「首席虚无官」。` : `本关已清空！你用 ${history.length} 次操作，成功创造了零价值。`) : `还有 ${remaining} 项待办。真实产出：始终为 0。`}</div>
             {won && optimal !== undefined && <p className="game-score" role="status">{history.length === optimal ? `完美摸鱼：${optimal} 步，已达到本关最少步数！` : `本关最少 ${optimal} 步，你用了 ${history.length} 步。重开试试更快下班？`} 提示可用，撤销不计入步数。</p>}
+            {dailyBest !== undefined && <p className="game-score">本次打开页面的同题纪录：{dailyBest} 步。{won && history.length > dailyBest ? `这次比纪录多 ${history.length - dailyBest} 步。` : !won ? '试试少做几步，早点下班。' : ''}</p>}
             {won && claimedDate && optimal !== undefined && <details className="game-receipt">
               <summary>分享下班回执</summary>
               <label htmlFor="game-receipt">点按或 Tab 选中文字，再手动复制；不会自动发布。</label>
@@ -121,7 +130,7 @@ export default function Game() {
         </div>
         <DailyChallenge onStart={startDaily} />
         <GameSave game={{ level, board, history, overtime, copyAll, challenging, rehearsing, claimedDate }} onRestore={restoreGame} />
-        <footer className="game-footer"><p>不上传、不产生绩效。刷新从第一关开始，可手动读取本机存档。</p><button onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.17 · 2026.11.18</span></footer>
+        <footer className="game-footer"><p>不上传、不产生绩效。刷新从第一关开始，可手动读取本机存档。</p><button onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.18 · 2026.11.19</span></footer>
       </div>
     </main>
   );
