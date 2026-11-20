@@ -49,6 +49,18 @@ test('all levels can be completed, undo reverses victory, replay starts fresh', 
   expect(screen.getByRole('button', { name: '撤销' })).toBeDisabled();
 });
 
+test('a regular move keeps cell focus until the winning move hands focus to the result', () => {
+  render(<Game />);
+  const [first, last] = levels[0].scramble;
+  cell(first).focus();
+  fireEvent.click(cell(first));
+  expect(cell(first)).toHaveFocus();
+  cell(last).focus();
+  fireEvent.click(cell(last));
+  expect(cell(last)).toBeDisabled();
+  expect(screen.getByText(/本关已清空！/)).toHaveFocus();
+});
+
 test('undo reverses victory and hides advancement', () => {
   render(<Game />);
   levels[0].scramble.forEach(index => fireEvent.click(cell(index)));

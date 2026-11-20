@@ -54,7 +54,11 @@ export default function Game() {
     setOvertime(next); resetBoard(next);
   }
   function play(index: number) {
-    setFuture([]); setHistory([...history, board]); setBoard(rules.toggle(board, index)); setHint(null); setPreview(null);
+    const next = rules.toggle(board, index);
+    const clearsBoard = !next.some(Boolean);
+    focusResult.current = clearsBoard;
+    setFuture([]); setHistory([...history, board]); setBoard(next); setHint(null); setPreview(null);
+    return clearsBoard;
   }
   function restart(next = level) {
     setClaimedDate(undefined);
@@ -106,7 +110,7 @@ export default function Game() {
               <button aria-pressed={rehearsing} disabled={won} onClick={() => { setRehearsing(!rehearsing); setPreview(null); setHint(null); }}>演练模式</button>
               <p id="rehearsal-help">{rehearsing ? '先选一个格子，看清连锁反应，再决定是否执行。预览不计步。' : '怕越忙越乱？开启演练，先看一步会发生什么。'}</p>
               <p className="rehearsal-status" role="status" aria-atomic="true">{previewBoard && preview !== null ? `演练第 ${Math.floor(preview / SIZE) + 1} 行第 ${preview % SIZE + 1} 列：待办 ${remaining} → ${previewBoard.filter(Boolean).length} 项。${previewBoard.some(Boolean) ? '这只是预览，待办尚未改变。' : '执行这一步即可下班！'}` : rehearsing && !won ? '点击棋盘选一步，◎ 标记演练起点。' : ''}</p>
-              {rehearsing && !won && <div className="rehearsal-actions"><button disabled={preview === null} onClick={() => { if (preview !== null) { const index = preview; focusResult.current = !previewBoard?.some(Boolean); play(index); if (!focusResult.current) cells.current[index]?.focus(); } }}>执行这一步</button><button disabled={preview === null} onClick={() => { const index = preview; setPreview(null); if (index !== null) cells.current[index]?.focus(); }}>取消演练</button></div>}
+              {rehearsing && !won && <div className="rehearsal-actions"><button disabled={preview === null} onClick={() => { if (preview !== null) { const index = preview; if (!play(index)) cells.current[index]?.focus(); } }}>执行这一步</button><button disabled={preview === null} onClick={() => { const index = preview; setPreview(null); if (index !== null) cells.current[index]?.focus(); }}>取消演练</button></div>}
             </div>
           </section>
           <aside className="game-notes">
@@ -130,7 +134,7 @@ export default function Game() {
         </div>
         <DailyChallenge onStart={startDaily} />
         <GameSave game={{ level, board, history, overtime, copyAll, challenging, rehearsing, claimedDate }} onRestore={restoreGame} />
-        <footer className="game-footer"><p>不上传、不产生绩效。刷新从第一关开始，可手动读取本机存档。</p><button onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.18 · 2026.11.19</span></footer>
+        <footer className="game-footer"><p>不上传、不产生绩效。刷新从第一关开始，可手动读取本机存档。</p><button onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.19 · 2026.11.20</span></footer>
       </div>
     </main>
   );
