@@ -1,7 +1,8 @@
 {
   "short_name": "NullBoard",
-  "name": "NullBoard Pro Max",
-  "description": "The ultra-premium project management tool with absolutely no features. Zero tasks. Zero pressure. Now with 50% more nothing.",
+  "name": "NullBoard · 清空待办局",
+  "lang": "zh-Hans",
+  "description": "点击格子，翻转一片待办。闯过五关，或领取每日同题，努力工作到所有工作都不存在。",
   "icons": [
     {
       "src": "favicon.svg",

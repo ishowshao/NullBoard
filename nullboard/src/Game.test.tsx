@@ -24,9 +24,16 @@ test('play, undo, restart and museum round trip preserve the current game', () =
   const before = cell(0).getAttribute('aria-pressed');
   fireEvent.click(cell(0));
   expect(cell(0).getAttribute('aria-pressed')).not.toBe(before);
-  fireEvent.click(screen.getByRole('button', { name: /参观旧版/ }));
-  expect(screen.getByRole('heading', { name: 'NullBoard Pro Max' })).toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: /返回清空/ }));
+  expect(screen.getByRole('button', { name: /参观旧版/ })).not.toHaveFocus();
+  for (let visit = 0; visit < 2; visit += 1) {
+    fireEvent.click(screen.getByRole('button', { name: /参观旧版/ }));
+    expect(screen.getByRole('heading', { name: 'NullBoard Pro Max' })).toBeInTheDocument();
+    expect(screen.getByRole('main')).toHaveAttribute('lang', 'en');
+    const exit = screen.getByRole('button', { name: /返回清空/ });
+    expect(exit).toHaveFocus();
+    fireEvent.click(exit);
+    expect(screen.getByRole('button', { name: /参观旧版/ })).toHaveFocus();
+  }
   expect(cell(0).getAttribute('aria-pressed')).not.toBe(before);
   fireEvent.click(screen.getByRole('button', { name: '撤销' }));
   expect(cell(0).getAttribute('aria-pressed')).toBe(before);

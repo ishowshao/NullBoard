@@ -10,6 +10,9 @@ import './game.css';
 export default function Game() {
   const cells = useRef<(HTMLButtonElement | null)[]>([]);
   const [museum, setMuseum] = useState(false);
+  const museumEntrance = useRef<HTMLButtonElement>(null);
+  const museumExit = useRef<HTMLButtonElement>(null);
+  const visitedMuseum = useRef(false);
   const [level, setLevel] = useState(0);
   const [board, setBoard] = useState(() => initialBoard(0));
   const [hint, setHint] = useState<number | null>(null);
@@ -34,6 +37,14 @@ export default function Game() {
   const optimal = rules.solve(overtime ?? initialBoard(level))?.length;
   const previewBoard = preview === null ? null : rules.toggle(board, preview);
   const dailyBest = claimedDate ? dailyBests[claimedDate] : undefined;
+  useEffect(() => {
+    if (museum) {
+      visitedMuseum.current = true;
+      museumExit.current?.focus();
+    } else if (visitedMuseum.current) {
+      museumEntrance.current?.focus();
+    }
+  }, [museum]);
   useEffect(() => {
     if (focusBoard.current) { cells.current[0]?.focus(); focusBoard.current = false; }
     if (focusResult.current) { result.current?.focus(); focusResult.current = false; }
@@ -76,7 +87,7 @@ export default function Game() {
     setHint(null); setPreview(null);
     focusResult.current = !saved.board.some(Boolean); focusBoard.current = !focusResult.current;
   }
-  if (museum) return <><div className="museum-return"><button onClick={() => setMuseum(false)}>← 返回清空待办局 · 保留本局</button></div><App /></>;
+  if (museum) return <><div className="museum-return"><button ref={museumExit} onClick={() => setMuseum(false)}>← 返回清空待办局 · 保留本局</button></div><App /></>;
   return (
     <main className="null-game">
       <div className="game-wrap">
@@ -134,7 +145,7 @@ export default function Game() {
         </div>
         <DailyChallenge onStart={startDaily} />
         <GameSave game={{ level, board, history, overtime, copyAll, challenging, rehearsing, claimedDate }} onRestore={restoreGame} />
-        <footer className="game-footer"><p>不上传、不产生绩效。刷新从第一关开始，可手动读取本机存档。</p><button onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.19 · 2026.11.20</span></footer>
+        <footer className="game-footer"><p>不上传、不产生绩效。刷新从第一关开始，可手动读取本机存档。</p><button ref={museumEntrance} onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.20 · 2026.11.21</span></footer>
       </div>
     </main>
   );

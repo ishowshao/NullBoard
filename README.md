@@ -39,11 +39,11 @@ A tiny, satirical project management app for developers who have had enough proj
 
 ## Online demo / 在线试玩
 
-**[Open NullBoard →](https://ishowshao.github.io/NullBoard/)**
+**[Open the game / 打开游戏 →](https://ishowshao.github.io/NullBoard/)**
 
-No installation or account needed. Try the five different buttons to unlock your Certificate of Nothing.
+Open the game and choose the museum button in the footer. Try all five buttons inside to unlock your Certificate of Nothing. No installation or account needed.
 
-无需安装或注册，试遍五个不同的按钮即可解锁「虚无证书」。
+打开游戏后，点页脚「参观旧版无用工具博物馆」。无需安装或注册，试遍馆内五个按钮即可解锁「虚无证书」。
 
 ## Try the joke in 30 seconds / 30 秒看懂这个玩笑
 

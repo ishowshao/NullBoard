@@ -40,7 +40,7 @@ function App() {
   }, [showMessage, dismissMessage]);
   
   return (
-    <main
+    <main lang="en"
       className={`min-h-screen ${darkMode ? 'bg-black text-white' : 'bg-white text-black'} flex flex-col items-center px-4 py-6 sm:px-8`}
     >
       <div className="flex justify-end w-full max-w-5xl mb-10">

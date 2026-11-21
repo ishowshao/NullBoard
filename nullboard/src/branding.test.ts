@@ -9,10 +9,10 @@ const html = new DOMParser().parseFromString(
 const manifest = JSON.parse(readFileSync(join(publicDirectory, 'manifest.json'), 'utf8'));
 
 test('introduces NullBoard and its deliberately useless premise in browser metadata', () => {
-  expect(html.title).toBe('NullBoard Pro Max | 50% more nothing');
-  expect(html.documentElement.lang).toBe('en');
+  expect(html.title).toBe('NullBoard · 清空待办局');
+  expect(html.documentElement.lang).toBe('zh-Hans');
   expect(html.querySelector('meta[name="description"]')?.getAttribute('content')).toBe(
-    'The ultra-premium project management tool with absolutely no features. Zero tasks. Zero pressure. Now with 50% more nothing.'
+    '点击格子，翻转一片待办。闯过五关，或领取每日同题，努力工作到所有工作都不存在。'
   );
 });
 
@@ -31,7 +31,8 @@ test('keeps share-preview titles and descriptions aligned with the page', () => 
 
 test('uses NullBoard branding and the default dark theme in the app manifest', () => {
   expect(manifest.short_name).toBe('NullBoard');
-  expect(manifest.name).toBe('NullBoard Pro Max');
+  expect(manifest.name).toBe(html.title);
+  expect(manifest.lang).toBe(html.documentElement.lang);
   expect(manifest.description).toBe(html.querySelector('meta[name="description"]')?.getAttribute('content'));
   expect(manifest.theme_color).toBe('#000000');
   expect(manifest.background_color).toBe('#000000');
