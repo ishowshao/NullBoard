@@ -38,22 +38,34 @@ test('a receipt follows the claimed archive board, even when browsing or restori
 
 test('a shared older puzzle can be played, but only after explicitly claiming it', () => {
   const original = window.location.href;
-  const day = '2026-11-06';
+  const day = '2026-11-18';
+  jest.useFakeTimers();
+  jest.setSystemTime(new Date('2027-01-01T12:00:00Z'));
+  const cell = (i: number) => screen.getByRole('button', { name: new RegExp(`第${Math.floor(i / 4) + 1}行第${i % 4 + 1}列`) });
+  const layout = () => Array.from({ length: 16 }, (_, i) => cell(i).getAttribute('aria-pressed') === 'true' ? '1' : '0').join('');
+  const { unmount } = render(<Game />);
+  const startingLayout = layout();
+  unmount();
   try {
     window.history.replaceState(null, '', '/NullBoard/?daily=' + day);
     render(<Game />);
     expect(screen.getByRole('heading', { name: '同题挑战 · ' + day })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /领取同一份/ })).toHaveAccessibleDescription(/最少 6 步/);
     expect(screen.getByText(/第 1 \/ 5 关/)).toBeInTheDocument();
     expect(screen.queryByText(/本局派单日期/)).not.toBeInTheDocument();
+    expect(layout()).toBe(startingLayout);
     click(/第1行第1列/);
+    expect(layout()).not.toBe(startingLayout);
+    expect(screen.queryByText(/本局派单日期/)).not.toBeInTheDocument();
     click('领取同一份待办 →');
     expect(screen.queryByRole('heading', { name: '同题挑战 · ' + day })).not.toBeInTheDocument();
     expect(screen.getByText('本局派单日期：' + day + '（UTC+8）')).toBeInTheDocument();
+    expect(screen.getByText(/规则已改变/)).toHaveTextContent('最少 6 步');
     expect(screen.getByRole('button', { name: /第1行第1列/ })).toHaveFocus();
-    dailyBoard(day).forEach((active, i) => {
-      expect(screen.getByRole('button', { name: new RegExp(`第${Math.floor(i / 4) + 1}行第${i % 4 + 1}列`) })).toHaveAttribute('aria-pressed', String(active));
-    });
+    // Compatibility fixture from the original v1 generator, not today's implementation.
+    expect(layout()).toBe('0011100000100110');
   } finally {
     window.history.replaceState(null, '', original);
+    jest.useRealTimers();
   }
 });

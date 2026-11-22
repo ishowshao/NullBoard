@@ -14,14 +14,13 @@ test('daily date rolls at UTC+8 midnight across month and year boundaries', () =
   expect(dailyDate(new Date('2026-11-11T16:00:00Z'))).toBe('2026-11-12');
   expect(dailyDate(new Date('2026-12-31T16:00:00Z'))).toBe('2027-01-01');
 });
-test('v1 daily boards are deterministic, reachable and hard for a full year', () => {
+test('v1 daily boards are deterministic and exactly six moves from completion for a full year', () => {
   let previous: boolean[] | null = null;
   for (let day = 0; day < 365; day++) {
     const date = dailyDate(new Date(Date.UTC(2026, 0, 1 + day)));
     const board = dailyBoard(date), solution = copyAllRules.solve(board)!;
     expect(board).toEqual(dailyBoard(date));
-    expect(solution.length).toBeGreaterThanOrEqual(5);
-    expect(solution.length).toBeLessThanOrEqual(6);
+    expect(solution).toHaveLength(6);
     expect(solution.reduce(copyAllRules.toggle, board).some(Boolean)).toBe(false);
     expect(board).not.toEqual(previous); previous = board;
   }
@@ -30,6 +29,7 @@ test('date refresh never starts a game and clicking after midnight uses the curr
   jest.useFakeTimers(); jest.setSystemTime(new Date('2026-11-11T15:59:59Z'));
   const onStart = jest.fn(); const view = render(<DailyChallenge onStart={onStart} />);
   expect(screen.getByText(/今日派单/)).toHaveTextContent('2026-11-11');
+  expect(screen.getByText(/全公司同一份难题/)).toHaveTextContent('最少 6 步');
   act(() => { jest.advanceTimersByTime(30000); });
   expect(screen.getByText(/今日派单/)).toHaveTextContent('2026-11-12');
   expect(onStart).not.toHaveBeenCalled();

@@ -99,7 +99,7 @@ export default function Game() {
         </section>
         {sharedDate && <section className="game-daily" aria-labelledby="shared-daily-title">
           <div><h2 id="shared-daily-title">同题挑战 · {sharedDate}</h2>
-            <p id="shared-daily-warning">你收到了一份「全员抄送」。领取才会替换当前棋盘，不影响本机存档。</p></div>
+            <p id="shared-daily-warning">你收到了一份「全员抄送」：整行整列翻转，最少 6 步。领取才会替换当前棋盘，不影响本机存档。</p></div>
           <button aria-describedby="shared-daily-warning" onClick={() => {
             startDaily(sharedDate); setSharedDate(undefined);
           }}>领取同一份待办 →</button>
@@ -126,7 +126,7 @@ export default function Game() {
           </section>
           <aside className="game-notes">
             <div className="game-stamp" aria-hidden="true">{won ? '准予下班' : '正在假装忙碌'}</div>
-            <h2>今日工作指示</h2><p>{overtime ? (copyAll ? `回复一人，抄送全行全列。七个同事一起忙，也能一起消失。规则已改变，每份都可解，最少 ${(optimal ?? 0) >= 5 ? '5–6' : '3–4'} 步。` : `本来可以下班了。你自愿抽了一份随机待办，办公室对此深表遗憾。每份都可解，最少 ${(optimal ?? 0) >= 5 ? '5–6' : '3–4'} 步。`) : levels[level].memo}</p>
+            <h2>今日工作指示</h2><p>{overtime ? (copyAll ? `回复一人，抄送全行全列。七个同事一起忙，也能一起消失。规则已改变，每份都可解，最少 ${claimedDate && optimal !== undefined ? optimal : (optimal ?? 0) >= 5 ? '5–6' : '3–4'} 步。` : `本来可以下班了。你自愿抽了一份随机待办，办公室对此深表遗憾。每份都可解，最少 ${(optimal ?? 0) >= 5 ? '5–6' : '3–4'} 步。`) : levels[level].memo}</p>
             <ul><li>亮格是待办，暗格是虚无。</li><li>{copyAll ? '空格也能点，一次翻转七格。' : '空格也能点，邻居也会变。'}</li><li>无倒计时，可无限撤销。</li></ul>
             <div ref={result} tabIndex={-1} className="game-result" role="status" aria-atomic="true">{won ? (overtime ? `${copyAll ? '全员抄送' : '临时待办'}已清空！${history.length} 次操作后，你再次获得了下班资格。` : final ? `全部 ${levels.length} 关通关！你用 ${history.length} 次操作完成最后一关。获封「首席虚无官」。` : `本关已清空！你用 ${history.length} 次操作，成功创造了零价值。`) : `还有 ${remaining} 项待办。真实产出：始终为 0。`}</div>
             {won && optimal !== undefined && <p className="game-score" role="status">{history.length === optimal ? `完美摸鱼：${optimal} 步，已达到本关最少步数！` : `本关最少 ${optimal} 步，你用了 ${history.length} 步。重开试试更快下班？`} 提示可用，撤销不计入步数。</p>}
@@ -145,7 +145,7 @@ export default function Game() {
         </div>
         <DailyChallenge onStart={startDaily} />
         <GameSave game={{ level, board, history, overtime, copyAll, challenging, rehearsing, claimedDate }} onRestore={restoreGame} />
-        <footer className="game-footer"><p>不上传、不产生绩效。刷新从第一关开始，可手动读取本机存档。</p><button ref={museumEntrance} onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.20 · 2026.11.21</span></footer>
+        <footer className="game-footer"><p>不上传、不产生绩效。刷新从第一关开始，可手动读取本机存档。</p><button ref={museumEntrance} onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.21 · 2026.11.22</span></footer>
       </div>
     </main>
   );
