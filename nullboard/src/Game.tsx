@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import App from './App';
 import GameSave from './GameSave';
 import DailyChallenge from './DailyChallenge';
@@ -29,6 +29,9 @@ export default function Game() {
   const focusBoard = useRef(false);
   const result = useRef<HTMLDivElement | null>(null);
   const focusResult = useRef(false);
+  const undoButton = useRef<HTMLButtonElement>(null);
+  const redoButton = useRef<HTMLButtonElement>(null);
+  const historyFocus = useRef<{ from: HTMLButtonElement; to: 'undo' | 'redo' } | null>(null);
   const remaining = board.filter(Boolean).length;
   const won = remaining === 0;
   const final = level === levels.length - 1;
@@ -49,6 +52,13 @@ export default function Game() {
     if (focusBoard.current) { cells.current[0]?.focus(); focusBoard.current = false; }
     if (focusResult.current) { result.current?.focus(); focusResult.current = false; }
   }, [board]);
+  useLayoutEffect(() => {
+    const handoff = historyFocus.current;
+    historyFocus.current = null;
+    if (!handoff || (document.activeElement !== handoff.from && document.activeElement !== document.body)) return;
+    const target = handoff.to === 'undo' ? undoButton.current : redoButton.current;
+    if (target && !target.disabled) target.focus();
+  }, [history.length, future.length]);
   useEffect(() => {
     if (!claimedDate || !won) return;
     const moves = history.length;
@@ -70,6 +80,23 @@ export default function Game() {
     focusResult.current = clearsBoard;
     setFuture([]); setHistory([...history, board]); setBoard(next); setHint(null); setPreview(null);
     return clearsBoard;
+  }
+  function undo(trigger: HTMLButtonElement) {
+    if (history.length === 1 && document.activeElement === trigger) {
+      historyFocus.current = { from: trigger, to: 'redo' };
+    }
+    setFuture([...future, board]); setBoard(history[history.length - 1]);
+    setHistory(history.slice(0, -1)); setHint(null); setPreview(null);
+  }
+  function redo(trigger: HTMLButtonElement) {
+    const next = future[future.length - 1];
+    const clearsBoard = !next.some(Boolean);
+    // A winning redo always announces the result instead of moving to Undo.
+    if (!clearsBoard && future.length === 1 && document.activeElement === trigger) {
+      historyFocus.current = { from: trigger, to: 'undo' };
+    }
+    setHistory([...history, board]); setBoard(next); setFuture(future.slice(0, -1));
+    setHint(null); setPreview(null); focusResult.current = clearsBoard;
   }
   function restart(next = level) {
     setClaimedDate(undefined);
@@ -115,7 +142,12 @@ export default function Game() {
                 return <button key={index} ref={el => { cells.current[index] = el; }} onKeyDown={event => { if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) { event.preventDefault(); cells.current[adjacentCell(index, event.key)]?.focus(); } }} className={`task-cell ${active ? 'task-active' : ''} ${hint === index ? 'task-hint' : ''} ${changes ? 'task-preview' : ''} ${preview === index ? 'task-preview-origin' : ''}`} aria-label={`第${Math.floor(index / SIZE) + 1}行第${index % SIZE + 1}列：${active ? '待办' : '空'}${hint === index ? '，建议点击' : ''}${changes ? `，演练后：${active ? '空' : '待办'}` : ''}${preview === index ? '，演练起点' : ''}`} aria-pressed={active} disabled={won} onClick={() => { if (rehearsing) { setPreview(index); setHint(null); } else play(index); }}><span aria-hidden="true">{preview === index ? '◎' : active ? '▣' : '·'}</span><small>{changes ? (active ? '待办→空' : '空→待办') : active ? '待办' : '空'}</small></button>;
               })}
             </div>
-            <div className="game-controls"><span>已操作 <strong>{history.length}</strong> 次</span><button disabled={!history.length} onClick={() => { setFuture([...future, board]); setBoard(history[history.length - 1]); setHistory(history.slice(0, -1)); setHint(null); setPreview(null); }}>撤销</button><button disabled={!future.length} onClick={() => { const next = future[future.length - 1]; setHistory([...history, board]); setBoard(next); setFuture(future.slice(0, -1)); setHint(null); setPreview(null); focusResult.current = !next.some(Boolean); }}>重做</button><button disabled={won} onClick={() => { setHint(rules.solve(board)?.[0] ?? null); setPreview(null); }}>求助同事</button><button onClick={() => resetBoard((overtime ?? initialBoard(level)).slice())}>重开本关</button></div>
+            <div className="game-controls"><span>已操作 <strong>{history.length}</strong> 次</span>
+              <button ref={undoButton} disabled={!history.length} onClick={event => undo(event.currentTarget)}>撤销</button>
+              <button ref={redoButton} disabled={!future.length} onClick={event => redo(event.currentTarget)}>重做</button>
+              <button disabled={won} onClick={() => { setHint(rules.solve(board)?.[0] ?? null); setPreview(null); }}>求助同事</button>
+              <button onClick={() => resetBoard((overtime ?? initialBoard(level)).slice())}>重开本关</button>
+            </div>
             <p className="hint-message" role="status">{hint !== null ? `同事建议：点击第 ${Math.floor(hint / SIZE) + 1} 行第 ${hint % SIZE + 1} 列。` : '卡住了？可以请同事指点一步。'}</p>
             <div className="game-rehearsal">
               <button aria-pressed={rehearsing} disabled={won} onClick={() => { setRehearsing(!rehearsing); setPreview(null); setHint(null); }}>演练模式</button>

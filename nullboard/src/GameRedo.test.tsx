@@ -4,7 +4,8 @@ import Game from './Game';
 import { initialBoard, solve } from './game';
 const cell = (i: number) => screen.getByRole('button', { name: new RegExp(`第${Math.floor(i / 4) + 1}行第${i % 4 + 1}列`) });
 const read = () => Array.from({ length: 16 }, (_, i) => cell(i).getAttribute('aria-pressed') === 'true');
-const click = (name: string | RegExp) => fireEvent.click(screen.getByRole('button', { name }));
+const button = (name: string | RegExp) => screen.getByRole('button', { name });
+const click = (name: string | RegExp) => fireEvent.click(button(name));
 afterEach(() => window.localStorage.clear());
 test('redo replays multiple undone moves and a new move discards the old branch', () => {
   render(<Game />);
@@ -18,10 +19,42 @@ test('redo replays multiple undone moves and a new move discards the old branch'
   click('撤销'); fireEvent.click(cell(2));
   expect(screen.getByRole('button', { name: '重做' })).toBeDisabled();
 });
+test('the last focused undo and redo move focus to the enabled counterpart', () => {
+  render(<Game />);
+  fireEvent.click(cell(0)); const played = read();
+  const undo = button('撤销'); const redo = button('重做');
+  undo.focus(); fireEvent.click(undo);
+  expect(undo).toBeDisabled(); expect(redo).toHaveFocus();
+  expect(read()).toEqual(initialBoard(0));
+  fireEvent.click(redo);
+  expect(redo).toBeDisabled(); expect(undo).toHaveFocus();
+  expect(read()).toEqual(played);
+});
+
+test('undo and redo keep their own focus while more moves remain', () => {
+  render(<Game />);
+  fireEvent.click(cell(0)); fireEvent.click(cell(1));
+  const undo = button('撤销'); const redo = button('重做');
+  undo.focus(); fireEvent.click(undo);
+  expect(undo).toBeEnabled(); expect(undo).toHaveFocus();
+  fireEvent.click(undo); expect(redo).toHaveFocus();
+  fireEvent.click(redo);
+  expect(redo).toBeEnabled(); expect(redo).toHaveFocus();
+});
+
+test('history actions do not claim unrelated focus when the buttons did not own it', () => {
+  render(<Game />);
+  fireEvent.click(cell(0));
+  const focusedCell = cell(1);
+  focusedCell.focus();
+  click('撤销'); expect(focusedCell).toHaveFocus();
+  click('重做'); expect(focusedCell).toHaveFocus();
+});
+
 test('redo can restore a victory and focus its result; restart clears the future', () => {
   render(<Game />);
   solve(initialBoard(0))!.forEach(i => fireEvent.click(cell(i)));
-  click('撤销'); click('求助同事'); click('重做');
+  click('撤销'); click('求助同事'); button('重做').focus(); click('重做');
   expect(cell(0)).toBeDisabled();
   expect(screen.getByText(/本关已清空！/)).toHaveFocus();
   expect(screen.queryByRole('button', { name: /建议点击/ })).not.toBeInTheDocument();
