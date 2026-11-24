@@ -2,7 +2,7 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Game from './Game';
-import { initialBoard, levels, SIZE, solve, toggle } from './game';
+import { copyAllRules, initialBoard, levels, SIZE, solve, toggle } from './game';
 
 function cell(index: number) { return screen.getByRole('button', { name: new RegExp(`第${Math.floor(index / SIZE) + 1}行第${index % SIZE + 1}列`) }); }
 function control(name: string) { return screen.getByRole('button', { name }); }
@@ -129,4 +129,56 @@ test('keyboard can preview, cancel and confirm without counting selection as a m
   // The second Enter selects a fresh preview after focus returns, not a second move.
   expect(screen.getByText(/已操作/)).toHaveTextContent('已操作 1 次');
   expect(readBoard()).toEqual(toggle(initialBoard(0), 5));
+});
+
+test('keyboard rehearsal of a hint previews the move without playing or throwing away redo', () => {
+  render(<Game />);
+  fireEvent.click(cell(0));
+  fireEvent.click(control('撤销'));
+  const original = readBoard();
+  const hint = solve(original)![0];
+  expect(screen.queryByRole('button', { name: '演练建议一步' })).not.toBeInTheDocument();
+  control('求助同事').focus();
+  userEvent.keyboard('{Enter}');
+  expect(control('求助同事')).toHaveFocus();
+  userEvent.tab();
+  expect(control('重开本关')).toHaveFocus();
+  userEvent.tab();
+  expect(control('演练建议一步')).toHaveFocus();
+  userEvent.keyboard('{Enter}{Enter}');
+  expect(cell(hint)).toHaveFocus();
+  expect(cell(hint)).toHaveAccessibleName(/演练起点/);
+  expect(control('演练模式')).toHaveAttribute('aria-pressed', 'true');
+  expect(control('重做')).toBeEnabled();
+  expect(screen.getByText(/已操作/)).toHaveTextContent('已操作 0 次');
+  expect(readBoard()).toEqual(original);
+  control('取消演练').focus();
+  userEvent.keyboard(' ');
+  expect(readBoard()).toEqual(original);
+  expect(control('重做')).toBeEnabled();
+  expect(control('执行这一步')).toBeDisabled();
+  expect(cell(hint)).toHaveFocus();
+});
+
+test('a daily challenge hint rehearses the seven-cell rule and confirmation plays precisely one move', () => {
+  render(<Game />);
+  fireEvent.click(screen.getByRole('button', { name: /领取今日全员抄送/ }));
+  fireEvent.click(control('演练模式'));
+  const original = readBoard();
+  const hint = copyAllRules.solve(original)![0];
+  fireEvent.click(cell(hint));
+  fireEvent.click(control('求助同事'));
+  expect(control('执行这一步')).toBeDisabled();
+  fireEvent.click(control('演练建议一步'));
+  expect(cell(hint)).toHaveFocus();
+  expect(cell(hint)).toHaveAccessibleName(/演练起点/);
+  const after = copyAllRules.toggle(original, hint);
+  expect(screen.getAllByRole('button', { name: /演练后/ })).toHaveLength(7);
+  const marked = after.map((_, i) => /演练后/.test(cell(i).getAttribute('aria-label')!));
+  expect(marked).toEqual(after.map((active, i) => active !== original[i]));
+  expect(readBoard()).toEqual(original);
+  fireEvent.click(control('执行这一步'));
+  expect(readBoard()).toEqual(after);
+  expect(screen.getByText(/已操作/)).toHaveTextContent('已操作 1 次');
+  expect(screen.queryByRole('button', { name: /演练起点|演练建议一步/ })).not.toBeInTheDocument();
 });

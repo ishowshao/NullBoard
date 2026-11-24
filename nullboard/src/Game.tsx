@@ -31,6 +31,7 @@ export default function Game() {
   const focusResult = useRef(false);
   const undoButton = useRef<HTMLButtonElement>(null);
   const redoButton = useRef<HTMLButtonElement>(null);
+  const focusHintPreview = useRef(false);
   const historyFocus = useRef<{ from: HTMLButtonElement; to: 'undo' | 'redo' } | null>(null);
   const remaining = board.filter(Boolean).length;
   const won = remaining === 0;
@@ -65,6 +66,12 @@ export default function Game() {
     setDailyBests(previous => previous[claimedDate] !== undefined && previous[claimedDate] <= moves
       ? previous : { ...previous, [claimedDate]: moves });
   }, [claimedDate, history.length, won]);
+  useLayoutEffect(() => {
+    if (focusHintPreview.current && preview !== null) {
+      focusHintPreview.current = false;
+      cells.current[preview]?.focus();
+    }
+  }, [hint, preview]);
   function resetBoard(nextBoard: boolean[]) {
     setBoard(nextBoard); setHistory([]); setFuture([]); setHint(null); setPreview(null); focusBoard.current = true;
   }
@@ -149,6 +156,10 @@ export default function Game() {
               <button onClick={() => resetBoard((overtime ?? initialBoard(level)).slice())}>重开本关</button>
             </div>
             <p className="hint-message" role="status">{hint !== null ? `同事建议：点击第 ${Math.floor(hint / SIZE) + 1} 行第 ${hint % SIZE + 1} 列。` : '卡住了？可以请同事指点一步。'}</p>
+            {hint !== null && <button className="hint-preview" onClick={() => {
+              focusHintPreview.current = true;
+              setRehearsing(true); setPreview(hint); setHint(null);
+            }}>演练建议一步</button>}
             <div className="game-rehearsal">
               <button aria-pressed={rehearsing} disabled={won} onClick={() => { setRehearsing(!rehearsing); setPreview(null); setHint(null); }}>演练模式</button>
               <p id="rehearsal-help">{rehearsing ? '先选一个格子，看清连锁反应，再决定是否执行。预览不计步。' : '怕越忙越乱？开启演练，先看一步会发生什么。'}</p>
@@ -177,7 +188,7 @@ export default function Game() {
         </div>
         <DailyChallenge onStart={startDaily} />
         <GameSave game={{ level, board, history, overtime, copyAll, challenging, rehearsing, claimedDate }} onRestore={restoreGame} />
-        <footer className="game-footer"><p>不上传、不产生绩效。刷新从第一关开始，可手动读取本机存档。</p><button ref={museumEntrance} onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.21 · 2026.11.22</span></footer>
+        <footer className="game-footer"><p>不上传、不产生绩效。刷新从第一关开始，可手动读取本机存档。</p><button ref={museumEntrance} onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.22 · 2026.11.24</span></footer>
       </div>
     </main>
   );
