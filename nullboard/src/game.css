@@ -17,6 +17,7 @@
 .game-rehearsal p { margin: 10px 0; font-size: 13px; line-height: 1.7; color: #bcc8bf; }
 .game-rehearsal .rehearsal-status { color: #ffcf70; }
 .rehearsal-status:empty { display: none; }
+.rehearsal-status:focus { outline: 2px solid currentColor; outline-offset: 3px; border-radius: 2px; }
 .rehearsal-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 
 .game-difficulty { margin: 1rem 0; padding: .8rem; border: 1px solid #58635b; border-radius: 12px; }

@@ -32,6 +32,7 @@ export default function Game() {
   const undoButton = useRef<HTMLButtonElement>(null);
   const redoButton = useRef<HTMLButtonElement>(null);
   const focusHintPreview = useRef(false);
+  const rehearsalSummary = useRef<HTMLParagraphElement>(null);
   const historyFocus = useRef<{ from: HTMLButtonElement; to: 'undo' | 'redo' } | null>(null);
   const remaining = board.filter(Boolean).length;
   const won = remaining === 0;
@@ -69,7 +70,8 @@ export default function Game() {
   useLayoutEffect(() => {
     if (focusHintPreview.current && preview !== null) {
       focusHintPreview.current = false;
-      cells.current[preview]?.focus();
+      // Focus the preview, not Execute: a repeated Enter must not play the suggested move.
+      rehearsalSummary.current?.focus();
     }
   }, [hint, preview]);
   function resetBoard(nextBoard: boolean[]) {
@@ -163,7 +165,7 @@ export default function Game() {
             <div className="game-rehearsal">
               <button aria-pressed={rehearsing} disabled={won} onClick={() => { setRehearsing(!rehearsing); setPreview(null); setHint(null); }}>演练模式</button>
               <p id="rehearsal-help">{rehearsing ? '先选一个格子，看清连锁反应，再决定是否执行。预览不计步。' : '怕越忙越乱？开启演练，先看一步会发生什么。'}</p>
-              <p className="rehearsal-status" role="status" aria-atomic="true">{previewBoard && preview !== null ? `演练第 ${Math.floor(preview / SIZE) + 1} 行第 ${preview % SIZE + 1} 列：待办 ${remaining} → ${previewBoard.filter(Boolean).length} 项。${previewBoard.some(Boolean) ? '这只是预览，待办尚未改变。' : '执行这一步即可下班！'}` : rehearsing && !won ? '点击棋盘选一步，◎ 标记演练起点。' : ''}</p>
+              <p ref={rehearsalSummary} className="rehearsal-status" role="status" aria-atomic="true" tabIndex={-1}>{previewBoard && preview !== null ? `演练第 ${Math.floor(preview / SIZE) + 1} 行第 ${preview % SIZE + 1} 列：待办 ${remaining} → ${previewBoard.filter(Boolean).length} 项。${previewBoard.some(Boolean) ? '这只是预览，待办尚未改变。' : '执行这一步即可下班！'}` : rehearsing && !won ? '点击棋盘选一步，◎ 标记演练起点。' : ''}</p>
               {rehearsing && !won && <div className="rehearsal-actions"><button disabled={preview === null} onClick={() => { if (preview !== null) { const index = preview; if (!play(index)) cells.current[index]?.focus(); } }}>执行这一步</button><button disabled={preview === null} onClick={() => { const index = preview; setPreview(null); if (index !== null) cells.current[index]?.focus(); }}>取消演练</button></div>}
             </div>
           </section>
@@ -188,7 +190,7 @@ export default function Game() {
         </div>
         <DailyChallenge onStart={startDaily} />
         <GameSave game={{ level, board, history, overtime, copyAll, challenging, rehearsing, claimedDate }} onRestore={restoreGame} />
-        <footer className="game-footer"><p>不上传、不产生绩效。刷新从第一关开始，可手动读取本机存档。</p><button ref={museumEntrance} onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.22 · 2026.11.24</span></footer>
+        <footer className="game-footer"><p>不上传、不产生绩效。刷新从第一关开始，可手动读取本机存档。</p><button ref={museumEntrance} onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.23 · 2026.11.25</span></footer>
       </div>
     </main>
   );
