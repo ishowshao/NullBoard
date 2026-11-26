@@ -9,6 +9,8 @@ import './game.css';
 
 export default function Game() {
   const cells = useRef<(HTMLButtonElement | null)[]>([]);
+  const boardPanel = useRef<HTMLElement>(null);
+  const dailyHeading = useRef<HTMLHeadingElement>(null);
   const [museum, setMuseum] = useState(false);
   const museumEntrance = useRef<HTMLButtonElement>(null);
   const museumExit = useRef<HTMLButtonElement>(null);
@@ -132,6 +134,7 @@ export default function Game() {
           <p className="game-eyebrow">DEPARTMENT OF NOTHING</p>
           <h1 id="game-title">清空<span>待办局</span><i aria-hidden="true">∅</i></h1>
           <p className="game-subtitle">努力工作，直到所有工作都不存在。</p>
+          <button className="game-daily-shortcut" onClick={() => dailyHeading.current?.focus()}>查看今日派单 · 6 步挑战 ↓</button>
         </section>
         {sharedDate && <section className="game-daily" aria-labelledby="shared-daily-title">
           <div><h2 id="shared-daily-title">同题挑战 · {sharedDate}</h2>
@@ -141,7 +144,7 @@ export default function Game() {
           }}>领取同一份待办 →</button>
         </section>}
         <div className="game-layout">
-          <section className="game-board-panel" aria-label="待办棋盘">
+          <section ref={boardPanel} tabIndex={-1} className="game-board-panel" aria-label="待办棋盘">
             <div className="game-board-top"><span>{overtime ? (copyAll ? '番外 · 全员抄送' : '番外 · 临时加班') : `第 ${level + 1} / ${levels.length} 关 · ${levels[level].name}`}</span><span>剩余 <strong>{remaining}</strong></span></div>
             {claimedDate && <p className="game-rule">本局派单日期：{claimedDate}（UTC+8）</p>}
             <p id="board-help" className="game-rule">{rehearsing ? `演练中：点击格子预览${influence}的翻转，选好后按「执行这一步」。方向键移动，空格或回车选择演练位置。` : `点击任意格子，翻转${influence}。让所有格子变成「空」，即可下班。键盘方向键移动，空格或回车翻转。`}</p>
@@ -188,9 +191,9 @@ export default function Game() {
             {(won || overtime) && <button className={overtime ? 'game-return' : 'game-next'} onClick={() => restart(final ? 0 : level + 1)}>{final ? '重新入职' : '下一关：更多无用之事'} →</button>}
           </aside>
         </div>
-        <DailyChallenge onStart={startDaily} />
+        <DailyChallenge onStart={startDaily} headingRef={dailyHeading} onBackToBoard={() => boardPanel.current?.focus()} />
         <GameSave game={{ level, board, history, overtime, copyAll, challenging, rehearsing, claimedDate }} onRestore={restoreGame} />
-        <footer className="game-footer"><p>不上传、不产生绩效。刷新从第一关开始，可手动读取本机存档。</p><button ref={museumEntrance} onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.23 · 2026.11.25</span></footer>
+        <footer className="game-footer"><p>不上传、不产生绩效。刷新从第一关开始，可手动读取本机存档。</p><button ref={museumEntrance} onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.24 · 2026.11.26</span></footer>
       </div>
     </main>
   );

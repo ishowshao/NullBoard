@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { dailyDate, previousDailyDates } from './daily';
 
-export default function DailyChallenge({ onStart }: { onStart: (date: string) => void }) {
+export default function DailyChallenge({ onStart, headingRef, onBackToBoard }: {
+  onStart: (date: string) => void;
+  headingRef?: React.Ref<HTMLHeadingElement>;
+  onBackToBoard?: () => void;
+}) {
   const [date, setDate] = useState(dailyDate);
   const [selected, setSelected] = useState('');
   const dates = previousDailyDates(date);
@@ -14,12 +18,13 @@ export default function DailyChallenge({ onStart }: { onStart: (date: string) =>
     return () => { window.clearInterval(timer); window.removeEventListener('focus', refresh); };
   }, []);
   return <section className="game-daily" aria-labelledby="daily-title">
-    <div><h2 id="daily-title">今日派单 · {date}</h2>
+    <div><h2 id="daily-title" ref={headingRef} tabIndex={-1}>今日派单 · {date}</h2>
       <p>全公司同一份难题：整行整列翻转，最少 6 步。每天 UTC+8 零点换题，无需先通关。</p>
       <p id="daily-warning">领取会重开当前局，可先在下方保存进度；跨天不会打断正在玩的棋盘。</p></div>
     <button aria-describedby="daily-warning" onClick={() => {
       const current = dailyDate(); setDate(current); onStart(current);
     }}>领取今日全员抄送 →</button>
+    {onBackToBoard && <button className="daily-back" onClick={onBackToBoard}>返回当前棋盘 ↑</button>}
     <div className="daily-archive">
       <h3>补班档案 · 过去七天</h3>
       <p>错过的下班机会，可以补办。选日期不换题，领取才会重开当前局；同一日期始终是同一题。</p>

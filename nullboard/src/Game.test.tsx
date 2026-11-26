@@ -223,3 +223,29 @@ test('overtime unlocks after the finale, keeps its board on restart and museum v
   initialBoard(0).forEach((on, i) => expect(cell(i)).toHaveAttribute('aria-pressed', String(on)));
   expect(cell(0)).toHaveFocus();
 });
+
+test('the daily shortcut moves focus without replacing a live board or its redo history', () => {
+  render(<Game />);
+  expect(document.body).toHaveFocus();
+  fireEvent.click(cell(0));
+  fireEvent.click(cell(1));
+  fireEvent.click(screen.getByRole('button', { name: '撤销' }));
+  const board = () => Array.from({ length: 16 }, (_, i) => cell(i).getAttribute('aria-pressed'));
+  const before = board();
+  fireEvent.click(screen.getByRole('button', { name: /查看今日派单/ }));
+  expect(screen.getByRole('heading', { name: /今日派单/ })).toHaveFocus();
+  expect(board()).toEqual(before);
+  expect(screen.getByRole('button', { name: '重做' })).toBeEnabled();
+  fireEvent.click(screen.getByRole('button', { name: /返回当前棋盘/ }));
+  expect(screen.getByRole('region', { name: '待办棋盘' })).toHaveFocus();
+  expect(board()).toEqual(before);
+  expect(screen.getByRole('button', { name: '撤销' })).toBeEnabled();
+  expect(screen.getByRole('button', { name: '重做' })).toBeEnabled();
+
+  fireEvent.click(screen.getByRole('button', { name: /查看今日派单/ }));
+  fireEvent.click(screen.getByRole('button', { name: /领取今日全员抄送/ }));
+  expect(screen.getByText(/本局派单日期/)).toBeInTheDocument();
+  expect(cell(0)).toHaveFocus();
+  expect(screen.getByRole('button', { name: '撤销' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: '重做' })).toBeDisabled();
+});

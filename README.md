@@ -4,6 +4,8 @@
 
 [立即试玩 / Play now](https://ishowshao.github.io/NullBoard/)
 
+直接玩经典 4×4，或在首页点「查看今日派单」挑战最少 6 步的全员抄送题，无需安装或先通关。
+
 NullBoard is now a tiny, static puzzle game about making work disappear. Click a square to toggle it and its orthogonal neighbors. Clear all 16 squares, survive five departments, and become the Chief Nothing Officer. No timer, account, backend, or telemetry.
 
 ## 怎么玩
