@@ -59,3 +59,7 @@
 .game-receipt summary { cursor: pointer; padding: .75rem 0; min-height: 44px; }
 .game-receipt label { display: block; font-size: .9rem; margin: .25rem 0; }
 .game-receipt textarea { box-sizing: border-box; width: 100%; min-width: 0; padding: .5rem; font: inherit; color: #202124; background: #fff; border: 1px solid #777; border-radius: .3rem; }
+
+.rehearsal-distance { display: flex; align-items: center; gap: 8px; width: fit-content; min-height: 44px; color: #e8efe8; font-size: 13px; cursor: pointer; }
+.rehearsal-distance input { width: 16px; height: 16px; flex: 0 0 16px; accent-color: #ffcf70; }
+.rehearsal-distance:focus-within { outline: 2px solid #fff; outline-offset: 3px; border-radius: 2px; }

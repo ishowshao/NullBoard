@@ -203,3 +203,43 @@ test('a winning hint still requires deliberate confirmation and then focuses the
   expect(readBoard().some(Boolean)).toBe(false);
   expect(screen.getByText(/本关已清空/)).toHaveFocus();
 });
+
+test('optional rehearsal distance distinguishes a detour from a shorter solution without making a move', () => {
+  render(<Game />);
+  const original = readBoard();
+  fireEvent.click(control('演练模式'));
+  fireEvent.click(cell(0));
+  const distance = screen.getByRole('checkbox', { name: '显示最少还要几步' });
+  expect(distance).not.toBeChecked();
+  expect(screen.queryByText(/最少还需/)).not.toBeInTheDocument();
+  fireEvent.click(distance);
+  expect(screen.getByText(/演练第 1 行第 1 列/)).toHaveTextContent('最少还需 2 → 3 步');
+  fireEvent.click(cell(5));
+  expect(screen.getByText(/演练第 2 行第 2 列/)).toHaveTextContent('最少还需 2 → 1 步');
+  expect(readBoard()).toEqual(original);
+  expect(control('撤销')).toBeDisabled();
+  fireEvent.click(distance);
+  expect(screen.queryByText(/最少还需/)).not.toBeInTheDocument();
+  fireEvent.click(control('执行这一步'));
+  expect(readBoard()).toEqual(toggle(original, 5));
+});
+
+test('daily rehearsal uses the seven-cell solver and leaves undo and redo unchanged', () => {
+  render(<Game />);
+  fireEvent.click(screen.getByRole('button', { name: /领取今日/ }));
+  const original = readBoard(), solution = copyAllRules.solve(original)!;
+  const detour = original.findIndex((_, index) => !solution.includes(index));
+  fireEvent.click(cell(detour)); fireEvent.click(control('撤销'));
+  fireEvent.click(control('演练模式'));
+  fireEvent.click(screen.getByRole('checkbox', { name: '显示最少还要几步' }));
+  fireEvent.click(cell(detour));
+  expect(screen.getByText(/演练第/)).toHaveTextContent('最少还需 6 → 7 步');
+  fireEvent.click(cell(solution[0]));
+  expect(screen.getByText(/演练第/)).toHaveTextContent('最少还需 6 → 5 步');
+  expect(screen.getAllByRole('button', { name: /演练后/ })).toHaveLength(7);
+  expect(readBoard()).toEqual(original);
+  fireEvent.click(control('取消演练'));
+  expect(screen.queryByText(/最少还需/)).not.toBeInTheDocument();
+  fireEvent.click(control('重做'));
+  expect(readBoard()).toEqual(copyAllRules.toggle(original, detour));
+});
