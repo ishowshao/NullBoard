@@ -11,6 +11,7 @@ export default function Game() {
   const cells = useRef<(HTMLButtonElement | null)[]>([]);
   const boardPanel = useRef<HTMLElement>(null);
   const dailyHeading = useRef<HTMLHeadingElement>(null);
+  const saveHeading = useRef<HTMLHeadingElement>(null);
   const [museum, setMuseum] = useState(false);
   const museumEntrance = useRef<HTMLButtonElement>(null);
   const museumExit = useRef<HTMLButtonElement>(null);
@@ -195,9 +196,9 @@ export default function Game() {
             {(won || overtime) && <button className={overtime ? 'game-return' : 'game-next'} onClick={() => restart(final ? 0 : level + 1)}>{final ? '重新入职' : '下一关：更多无用之事'} →</button>}
           </aside>
         </div>
-        <DailyChallenge onStart={startDaily} headingRef={dailyHeading} onBackToBoard={() => boardPanel.current?.focus()} />
-        <GameSave game={{ level, board, history, overtime, copyAll, challenging, rehearsing, claimedDate }} onRestore={restoreGame} />
-        <footer className="game-footer"><p>不上传、不产生绩效。刷新从第一关开始，可手动读取本机存档。</p><button ref={museumEntrance} onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.25 · 2026.11.27</span></footer>
+        <DailyChallenge onStart={startDaily} headingRef={dailyHeading} onBackToBoard={() => boardPanel.current?.focus()} onGoToSave={() => saveHeading.current?.focus()} />
+        <GameSave game={{ level, board, history, overtime, copyAll, challenging, rehearsing, claimedDate }} onRestore={restoreGame} headingRef={saveHeading} onGoToDaily={() => dailyHeading.current?.focus()} />
+        <footer className="game-footer"><p>不上传、不产生绩效。刷新从第一关开始，可手动读取本机存档。</p><button ref={museumEntrance} onClick={() => setMuseum(true)}>参观旧版无用工具博物馆 →</button><span>v0.26 · 2026.11.28</span></footer>
       </div>
     </main>
   );

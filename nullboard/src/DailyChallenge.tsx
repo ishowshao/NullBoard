@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { dailyDate, previousDailyDates } from './daily';
 
-export default function DailyChallenge({ onStart, headingRef, onBackToBoard }: {
+export default function DailyChallenge({ onStart, headingRef, onBackToBoard, onGoToSave }: {
   onStart: (date: string) => void;
   headingRef?: React.Ref<HTMLHeadingElement>;
   onBackToBoard?: () => void;
+  onGoToSave?: () => void;
 }) {
   const [date, setDate] = useState(dailyDate);
   const [selected, setSelected] = useState('');
@@ -21,6 +22,7 @@ export default function DailyChallenge({ onStart, headingRef, onBackToBoard }: {
     <div><h2 id="daily-title" ref={headingRef} tabIndex={-1}>今日派单 · {date}</h2>
       <p>全公司同一份难题：整行整列翻转，最少 6 步。每天 UTC+8 零点换题，无需先通关。</p>
       <p id="daily-warning">领取会重开当前局，可先在下方保存进度；跨天不会打断正在玩的棋盘。</p></div>
+    {onGoToSave && <button className="daily-back" onClick={onGoToSave}>前往本机存档 ↓</button>}
     <button aria-describedby="daily-warning" onClick={() => {
       const current = dailyDate(); setDate(current); onStart(current);
     }}>领取今日全员抄送 →</button>

@@ -146,3 +146,44 @@ test('keyboard archive limits retain focus, ignore repeated activation, and allo
   expect(screen.getByRole('status')).not.toHaveTextContent('已到');
   expect(onStart).not.toHaveBeenCalled();
 });
+
+test('the save detour keeps the board, redo and an existing checkpoint until explicitly saved', () => {
+  render(<Game />);
+  const initial = read();
+  click('保存当前局');
+  const storageBefore = Object.entries(localStorage);
+  fireEvent.click(cell(0));
+  const current = read();
+  fireEvent.click(cell(1));
+  const redoBoard = read();
+  click('撤销');
+
+  click(/查看今日派单/);
+  const daily = screen.getByRole('heading', { name: /今日派单/ });
+  const save = screen.getByRole('heading', { name: '摸鱼留档处' });
+  expect(daily).toHaveFocus();
+  userEvent.tab();
+  expect(screen.getByRole('button', { name: /前往本机存档/ })).toHaveFocus();
+  userEvent.keyboard('{Enter}{Enter}');
+  expect(save).toHaveFocus();
+  expect(Object.entries(localStorage)).toEqual(storageBefore);
+  expect(read()).toEqual(current);
+
+  click(/返回派单/);
+  expect(daily).toHaveFocus();
+  click('重做');
+  expect(read()).toEqual(redoBoard);
+  click('撤销');
+  click(/前往本机存档/);
+  userEvent.tab();
+  expect(screen.getByRole('button', { name: /覆盖存档/ })).toHaveFocus();
+  userEvent.keyboard('{Enter}');
+  expect(Object.entries(localStorage)).not.toEqual(storageBefore);
+  click(/返回派单/);
+  click(/领取今日/);
+  expect(screen.getByText(/本局派单日期/)).toBeInTheDocument();
+  click(/读取存档/);
+  expect(read()).toEqual(current);
+  click('撤销');
+  expect(read()).toEqual(initial);
+});
